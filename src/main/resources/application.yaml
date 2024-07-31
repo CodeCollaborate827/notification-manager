@@ -3,7 +3,8 @@ spring:
     name: notification-manager
   data:
     mongodb:
-      uri: mongodb://localhost:27017/notification_manager
+      uri: mongodb://localhost:27017
+      database: notification_manager
 server:
   port: 8084
 eureka:
