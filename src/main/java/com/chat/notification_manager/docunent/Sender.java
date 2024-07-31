@@ -8,7 +8,6 @@ import org.springframework.data.mongodb.core.mapping.Field;
 @Data
 @Document(collection = "sender")
 public class Sender {
-  @Id
   @Field("sender_id")
   private String senderId;
 

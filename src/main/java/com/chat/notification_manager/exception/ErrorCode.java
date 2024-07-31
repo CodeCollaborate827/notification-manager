@@ -1,5 +1,8 @@
 package com.chat.notification_manager.exception;
 
+import lombok.Getter;
+
+@Getter
 public enum ErrorCode {
   NOTIFICATION_ERROR1("Notification not found", 404);
 
@@ -11,11 +14,4 @@ public enum ErrorCode {
     this.httpStatus = httpStatus;
   }
 
-  public String getErrorMessage() {
-    return errorMessage;
-  }
-
-  public int getHttpStatus() {
-    return httpStatus;
-  }
 }

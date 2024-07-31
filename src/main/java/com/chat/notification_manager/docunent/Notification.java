@@ -1,9 +1,13 @@
 package com.chat.notification_manager.docunent;
 
 import lombok.Data;
+import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
+
+import java.time.OffsetDateTime;
 
 @Data
 @Document(collection = "notification")
@@ -32,10 +36,12 @@ public class Notification {
   private NotificationType type; // message, friend_request, reaction, mention, etc.
 
   @Field("created_at")
-  private String createdAt;
+  @CreatedDate
+  private OffsetDateTime createdAt;
 
   @Field("updated_at")
-  private String updatedAt;
+  @LastModifiedDate
+  private OffsetDateTime updatedAt;
 
   public enum Status {
     UNREAD,
