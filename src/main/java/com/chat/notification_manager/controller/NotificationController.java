@@ -9,10 +9,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 
 @Slf4j
@@ -45,8 +42,8 @@ public class NotificationController {
     )
     @GetMapping("/allNotifications/{receiverId}")
     // TODO: add from and to query parameters for paging(limit 20 notifications)
-    public Flux<ResponseEntity<NotificationDTO>> getAllNotifications(@PathVariable String receiverId) {
-        return notificationService.getAllNotifications(receiverId);
+    public Flux<ResponseEntity<NotificationDTO>> getAllNotifications(@RequestHeader String userId) {
+        return notificationService.getAllNotifications(userId);
     }
 
     @Operation(summary = "Get all read notifications for a user")
@@ -70,8 +67,8 @@ public class NotificationController {
             description = "Internal server error",
             content = @Content
     )
-    @GetMapping("/getAllReadNotifications/{receiverId}")
-    public Flux<ResponseEntity<NotificationDTO>> getAllReadNotifications(@PathVariable String receiverId) {
-        return notificationService.getAllReadNotifications(receiverId);
+    @GetMapping("/getAllReadNotifications/{userId}")
+    public Flux<ResponseEntity<NotificationDTO>> getAllReadNotifications(@RequestHeader String userId) {
+        return notificationService.getAllReadNotifications(userId);
     }
 }

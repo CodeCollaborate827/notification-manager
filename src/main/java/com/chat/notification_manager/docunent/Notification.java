@@ -14,14 +14,8 @@ import java.time.OffsetDateTime;
 public class Notification {
   @Id private String id;
 
-  @Field("sender_id")
-  private String senderId;
-
-  @Field("receiver_id")
-  private String receiverId;
-
-  @Field("conversation_id")
-  private String conversationId;
+  @Field("user_id")
+  private String userId;
 
   @Field("content")
   private String content;
@@ -35,6 +29,9 @@ public class Notification {
   @Field("type")
   private NotificationType type; // message, friend_request, reaction, mention, etc.
 
+  @Field("properties")
+  private Object properties;
+
   @Field("created_at")
   @CreatedDate
   private OffsetDateTime createdAt;
@@ -42,6 +39,10 @@ public class Notification {
   @Field("updated_at")
   @LastModifiedDate
   private OffsetDateTime updatedAt;
+
+  private Object data;
+
+
 
   public enum Status {
     UNREAD,

@@ -13,12 +13,12 @@ import java.time.OffsetDateTime;
 @AllArgsConstructor
 @Builder
 public class NewNotificationEvent {
-    private NotificationType notificationType;
-    private String notificationId;
-    private String notificationTitle;
-    private String notificationImage;
-    private String notificationContent;
+    private NotificationType type;
+    private String id;
+    private String title;
+    private String image;
+    private String content;
     private OffsetDateTime createdAt;
-    private Object data;
+    private Object properties;
 
 }
