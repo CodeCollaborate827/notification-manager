@@ -20,6 +20,7 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     public Flux<ResponseEntity<NotificationDTO>> getAllNotifications(String receiverId) {
+        // TODO: return number of new notifications
         return notificationRepository.findAllByReceiverId(receiverId)
                 .flatMap(notification -> {
                     log.info("Notification found: {}", notification);
