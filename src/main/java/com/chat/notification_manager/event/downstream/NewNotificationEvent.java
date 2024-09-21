@@ -19,6 +19,6 @@ public class NewNotificationEvent {
     private String notificationImage;
     private String notificationContent;
     private OffsetDateTime createdAt;
-
+    private Object data;
 
 }
