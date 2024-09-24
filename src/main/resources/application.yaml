@@ -5,6 +5,22 @@ spring:
     mongodb:
       uri: mongodb://localhost:27017
       database: notification_manager
+  cloud:
+    function:
+      definition: messageMentionedDownstreamConsumer|messageReactedDownstreamConsumer|newFriendRequestDownstreamConsumer|newNotificationUpstream
+    Stream:
+      bindings:
+        messageMentionedDownstreamConsumer-in-0:
+          destination: topic.conversation.notification
+        messageReactedDownstreamConsumer-in-0:
+          destination: topic.conversation.notification
+        newFriendRequestDownstreamConsumer-in-0:
+          destination: topic.user.notification
+        newNotificationUpstream-out-0:
+          destination: topic.notification
+      kafka:
+        binder:
+          brokers: localhost:9092
 server:
   port: 8084
 eureka:

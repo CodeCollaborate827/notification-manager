@@ -17,58 +17,42 @@ import reactor.core.publisher.Flux;
 @RequiredArgsConstructor
 @RequestMapping("/api/notification")
 public class NotificationController {
-    private final NotificationService notificationService;
+  private final NotificationService notificationService;
 
-    @Operation(summary = "Get all notifications for a user")
-    @ApiResponse(
-            responseCode = "200",
-            description = "Notifications retrieved successfully",
-            content = {
-                    @Content(
-                            mediaType = "application/json",
-                            schema = @Schema(implementation = NotificationDTO.class)
-                    )
-            }
-    )
-    @ApiResponse(
-            responseCode = "404",
-            description = "Notifications not found",
-            content = @Content
-    )
-    @ApiResponse(
-            responseCode = "500",
-            description = "Internal server error",
-            content = @Content
-    )
-    @GetMapping("/allNotifications/{receiverId}")
-    // TODO: add from and to query parameters for paging(limit 20 notifications)
-    public Flux<ResponseEntity<NotificationDTO>> getAllNotifications(@RequestHeader String userId) {
-        return notificationService.getAllNotifications(userId);
-    }
+  @Operation(summary = "Get all notifications for a user")
+  @ApiResponse(
+      responseCode = "200",
+      description = "Notifications retrieved successfully",
+      content = {
+        @Content(
+            mediaType = "application/json",
+            schema = @Schema(implementation = NotificationDTO.class))
+      })
+  @ApiResponse(responseCode = "404", description = "Notifications not found", content = @Content)
+  @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content)
+  @GetMapping("/allNotifications/{receiverId}")
+  // TODO: add from and to query parameters for paging(limit 20 notifications)
+  public Flux<ResponseEntity<NotificationDTO>> getAllNotifications(@RequestHeader String userId) {
+    return notificationService.getAllNotifications(userId);
+  }
 
-    @Operation(summary = "Get all read notifications for a user")
-    @ApiResponse(
-            responseCode = "200",
-            description = "Read notifications retrieved successfully",
-            content = {
-                    @Content(
-                            mediaType = "application/json",
-                            schema = @Schema(implementation = NotificationDTO.class)
-                    )
-            }
-    )
-    @ApiResponse(
-            responseCode = "404",
-            description = "Read notifications not found",
-            content = @Content
-    )
-    @ApiResponse(
-            responseCode = "500",
-            description = "Internal server error",
-            content = @Content
-    )
-    @GetMapping("/getAllReadNotifications/{userId}")
-    public Flux<ResponseEntity<NotificationDTO>> getAllReadNotifications(@RequestHeader String userId) {
-        return notificationService.getAllReadNotifications(userId);
-    }
+  @Operation(summary = "Get all read notifications for a user")
+  @ApiResponse(
+      responseCode = "200",
+      description = "Read notifications retrieved successfully",
+      content = {
+        @Content(
+            mediaType = "application/json",
+            schema = @Schema(implementation = NotificationDTO.class))
+      })
+  @ApiResponse(
+      responseCode = "404",
+      description = "Read notifications not found",
+      content = @Content)
+  @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content)
+  @GetMapping("/getAllReadNotifications/{userId}")
+  public Flux<ResponseEntity<NotificationDTO>> getAllReadNotifications(
+      @RequestHeader String userId) {
+    return notificationService.getAllReadNotifications(userId);
+  }
 }

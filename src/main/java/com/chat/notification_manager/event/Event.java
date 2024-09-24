@@ -1,22 +1,23 @@
 package com.chat.notification_manager.event;
 
+import com.chat.notification_manager.enums.NotificationType;
+import java.time.Instant;
+import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.time.Instant;
-import java.util.UUID;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class Event {
-  //TODO: this one is duplicated across services
+  // TODO: this one is duplicated across services
 
+  private String userId;
   @Builder.Default private String specVersion = "1.0";
-  private String type;
+  private NotificationType type;
   @Builder.Default private String id = UUID.randomUUID().toString();
   @Builder.Default private Long timestamp = Instant.now().getEpochSecond();
   @Builder.Default private String dataContentType = "application/json";
