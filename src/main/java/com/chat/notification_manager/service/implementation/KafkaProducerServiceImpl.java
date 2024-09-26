@@ -9,7 +9,7 @@ import com.chat.notification_manager.repository.UserRepository;
 import com.chat.notification_manager.service.KafkaProducerService;
 import com.chat.notification_manager.utils.DecodeUtil;
 import com.chat.notification_manager.utils.Utils;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.Message;
@@ -24,8 +24,7 @@ import reactor.core.publisher.Sinks;
 public class KafkaProducerServiceImpl implements KafkaProducerService {
   private final UserRepository userRepository;
   private final ConversationRepository conversationRepository;
-  private final ObjectMapper objectMapper;
-  private final DecodeUtil<NotificationDTO> decodeUtil = new DecodeUtil<>(objectMapper);
+  private final DecodeUtil<NotificationDTO> decodeUtil;
 
   @Override
   public void sendNewRegistryEvent(Notification notification) {
@@ -41,21 +40,22 @@ public class KafkaProducerServiceImpl implements KafkaProducerService {
   }
 
   private Mono<Void> emitEvent(Notification notification, NotificationDTO notificationDTO) {
-    Event event = createEvent(notification, notificationDTO);
-    Message<Event> message = MessageBuilder.withPayload(event).build();
-    Sinks.EmitResult result =
-        ProducerBindingConfig.newNotificationUpstreamSink.tryEmitNext(message);
+    return Mono.fromCallable(() -> {
+      Event event = createEvent(notification, notificationDTO);
+      Message<Event> message = MessageBuilder.withPayload(event).build();
+      Sinks.EmitResult result = ProducerBindingConfig.newNotificationUpstreamSink.tryEmitNext(message);
 
-    if (result.isFailure()) {
-      log.error("Failed to emit message: {}", result);
-      return Mono.error(new RuntimeException("Failed to emit message"));
-    }
+      if (result.isFailure()) {
+        log.error("Failed to emit message: {}", result);
+        throw new RuntimeException("Failed to emit message");
+      }
 
-    log.info("Message emitted: {}", message);
-    return Mono.empty();
+      log.info("Message emitted successfully: {}", message);
+      return Mono.empty();
+    }).then();
   }
 
-  private Event createEvent(Notification notification, NotificationDTO notificationDTO) {
+  private Event createEvent(Notification notification, NotificationDTO notificationDTO) throws JsonProcessingException {
     return Event.builder()
         .userId(notification.getUserId())
         .type(notification.getType())

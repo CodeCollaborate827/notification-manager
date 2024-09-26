@@ -4,7 +4,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Base64;
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
 
+@Component
 @RequiredArgsConstructor
 public class DecodeUtil<T> {
   private final ObjectMapper objectMapper;
@@ -15,7 +17,8 @@ public class DecodeUtil<T> {
     return objectMapper.readValue(json, clazz);
   }
 
-  public String encode(T object) {
-    return null;
+  public String encode(T object) throws JsonProcessingException {
+    String json = objectMapper.writeValueAsString(object);
+    return Base64.getEncoder().encodeToString(json.getBytes());
   }
 }

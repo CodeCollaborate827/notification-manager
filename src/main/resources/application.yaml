@@ -7,7 +7,7 @@ spring:
       database: notification_manager
   cloud:
     function:
-      definition: messageMentionedDownstreamConsumer|messageReactedDownstreamConsumer|newFriendRequestDownstreamConsumer|newNotificationUpstream
+      definition: messageMentionedDownstreamConsumer;messageReactedDownstreamConsumer;newFriendRequestDownstreamConsumer;newNotificationUpstream
     Stream:
       bindings:
         messageMentionedDownstreamConsumer-in-0:
