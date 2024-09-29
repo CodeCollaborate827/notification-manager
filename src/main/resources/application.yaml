@@ -7,7 +7,7 @@ spring:
       database: notification_manager
   cloud:
     function:
-      definition: messageMentionedDownstreamConsumer;messageReactedDownstreamConsumer;newFriendRequestDownstreamConsumer;newNotificationUpstream
+      definition: messageMentionedDownstreamConsumer;messageReactedDownstreamConsumer;newFriendRequestDownstreamConsumer;newNotificationUpstream; func1
     Stream:
       bindings:
         messageMentionedDownstreamConsumer-in-0:
@@ -17,7 +17,11 @@ spring:
         newFriendRequestDownstreamConsumer-in-0:
           destination: topic.user.notification
         newNotificationUpstream-out-0:
-          destination: topic.notification
+          destination: topic.user.notification
+        func1-in-0:
+          destination: topic-input
+        func1-out-0:
+          destination: topic-output
       kafka:
         binder:
           brokers: localhost:9092
