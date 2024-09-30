@@ -40,8 +40,8 @@ public class ConsumerBindingConfig {
     private final DecodeUtil<NotificationDTO> decodeUtil;
 
     @Bean
-    public Consumer<Flux<Message<Event>>> messageMentionedDownstreamConsumer() {
-        return genericEventConsumer();
+    public Function<Flux<Message<Event>>, Flux<Message<Event>>> messageMentionedDownstreamConsumer() {
+        return genericEventConsumer(NotificationType.MESSAGE_MENTIONED);
     }
 
     @Bean
@@ -50,8 +50,8 @@ public class ConsumerBindingConfig {
     }
 
     @Bean
-    public Consumer<Flux<Message<Event>>> newFriendRequestDownstreamConsumer() {
-        return genericEventConsumer();
+    public Function<Flux<Message<Event>>, Flux<Message<Event>>> newFriendRequestDownstreamConsumer() {
+        return genericEventConsumer(NotificationType.NEW_FRIEND);
     }
 
     private Function<Flux<Message<Event>>, Flux<Message<Event>>> genericEventConsumer(NotificationType notificationType) {
@@ -64,6 +64,16 @@ public class ConsumerBindingConfig {
 //                        .onErrorResume(this::handleError)
     }
 
+    private Event createEvent(NotificationDTO notificationDTO) {
+        try {
+            return Event.builder()
+                    .payloadBase64(decodeUtil.encode(notificationDTO))
+                    .build();
+        } catch (JsonProcessingException e) {
+            throw new ApplicationException(ErrorCode.EVENT_ERROR1);
+        }
+    }
+
     @Bean
     public Function<Flux<Message<String>>, Flux<Message<String>>> func1() {
         return flux -> flux.map(msg -> {
@@ -73,13 +83,13 @@ public class ConsumerBindingConfig {
         });
     }
 
-    private Mono<Notification> processMessage(Message<Event> message) {
+    private Mono<Notification> processMessage(Message<Event> message, NotificationType notificationType) {
         Event event = message.getPayload();
         String payloadBase64 = event.getPayloadBase64();
 
-        log.info("Processing message with type: {}", event.getType());
+        log.info("Processing message with type: {}", notificationType);
 
-        return switch (event.getType()) {
+        return switch (notificationType) {
             case NotificationType.NEW_FRIEND ->
                     decodeAndCreateNotification(payloadBase64, NewFriendRequestEvent.class);
             case NotificationType.MESSAGE_MENTIONED ->
@@ -87,7 +97,7 @@ public class ConsumerBindingConfig {
             case NotificationType.MESSAGE_REACTED ->
                     decodeAndCreateNotification(payloadBase64, MessageReactedEvent.class);
             default -> {
-                log.warn("Unknown notification type: {}", event.getType());
+                log.warn("Unknown notification type: {}", notificationType);
                 yield Mono.empty();
             }
         };
