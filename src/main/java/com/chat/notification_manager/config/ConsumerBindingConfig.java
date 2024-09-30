@@ -1,15 +1,20 @@
 package com.chat.notification_manager.config;
 
 import com.chat.notification_manager.docunent.Notification;
+import com.chat.notification_manager.dto.response.NotificationDTO;
 import com.chat.notification_manager.enums.NotificationType;
 import com.chat.notification_manager.enums.Status;
 import com.chat.notification_manager.event.Event;
 import com.chat.notification_manager.event.upstream.MessageMentionedEvent;
 import com.chat.notification_manager.event.upstream.MessageReactedEvent;
 import com.chat.notification_manager.event.upstream.NewFriendRequestEvent;
-import com.chat.notification_manager.service.KafkaProducerService;
+import com.chat.notification_manager.exception.ApplicationException;
+import com.chat.notification_manager.exception.ErrorCode;
+import com.chat.notification_manager.repository.ConversationRepository;
+import com.chat.notification_manager.repository.UserRepository;
 import com.chat.notification_manager.service.NotificationService;
 import com.chat.notification_manager.utils.DecodeUtil;
+import com.chat.notification_manager.utils.Utils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +27,6 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.OffsetDateTime;
-import java.util.function.Consumer;
 import java.util.function.Function;
 
 @Configuration
@@ -31,7 +35,9 @@ import java.util.function.Function;
 public class ConsumerBindingConfig {
     private final ObjectMapper objectMapper;
     private final NotificationService notificationService;
-    private final KafkaProducerService kafkaProducerService;
+    private final ConversationRepository conversationRepository;
+    private final UserRepository userRepository;
+    private final DecodeUtil<NotificationDTO> decodeUtil;
 
     @Bean
     public Consumer<Flux<Message<Event>>> messageMentionedDownstreamConsumer() {
@@ -39,8 +45,8 @@ public class ConsumerBindingConfig {
     }
 
     @Bean
-    public Consumer<Flux<Message<Event>>> messageReactedDownstreamConsumer() {
-        return genericEventConsumer();
+    public Function<Flux<Message<Event>>, Flux<Message<Event>>> messageReactedDownstreamConsumer() {
+        return genericEventConsumer(NotificationType.MESSAGE_REACTED);
     }
 
     @Bean
@@ -48,13 +54,14 @@ public class ConsumerBindingConfig {
         return genericEventConsumer();
     }
 
-    private Consumer<Flux<Message<Event>>> genericEventConsumer() {
+    private Function<Flux<Message<Event>>, Flux<Message<Event>>> genericEventConsumer(NotificationType notificationType) {
         return flux ->
-                flux.flatMap(this::processMessage)
-                        .doOnNext(notificationService::saveNotification)
-//                        .doOnNext(kafkaProducerService::sendNewRegistryEvent)
-                        .onErrorResume(this::handleError)
-                        .subscribe();
+                flux.flatMap(msg -> processMessage(msg, notificationType))
+                        .flatMap(notificationService::saveNotification)
+                        .flatMap(notification -> Utils.mapNotificationToDTO(notification, userRepository, conversationRepository))
+                        .map(this::createEvent)
+                        .map(GenericMessage::new);
+//                        .onErrorResume(this::handleError)
     }
 
     @Bean
@@ -66,11 +73,6 @@ public class ConsumerBindingConfig {
         });
     }
 
-    private Mono<Notification> handleError(Throwable throwable) {
-        log.error("Error when consuming message: {}", throwable.getMessage(), throwable);
-        return Mono.empty();
-    }
-
     private Mono<Notification> processMessage(Message<Event> message) {
         Event event = message.getPayload();
         String payloadBase64 = event.getPayloadBase64();
@@ -79,11 +81,11 @@ public class ConsumerBindingConfig {
 
         return switch (event.getType()) {
             case NotificationType.NEW_FRIEND ->
-                    decodeAndCreateNotification(payloadBase64, NewFriendRequestEvent.class, event);
+                    decodeAndCreateNotification(payloadBase64, NewFriendRequestEvent.class);
             case NotificationType.MESSAGE_MENTIONED ->
-                    decodeAndCreateNotification(payloadBase64, MessageMentionedEvent.class, event);
+                    decodeAndCreateNotification(payloadBase64, MessageMentionedEvent.class);
             case NotificationType.MESSAGE_REACTED ->
-                    decodeAndCreateNotification(payloadBase64, MessageReactedEvent.class, event);
+                    decodeAndCreateNotification(payloadBase64, MessageReactedEvent.class);
             default -> {
                 log.warn("Unknown notification type: {}", event.getType());
                 yield Mono.empty();
@@ -92,36 +94,43 @@ public class ConsumerBindingConfig {
     }
 
     private <T> Mono<Notification> decodeAndCreateNotification(
-            String payloadBase64, Class<T> clazz, Event event) {
-        DecodeUtil<T> decodeUtil = new DecodeUtil<>(objectMapper);
+            String payloadBase64, Class<T> clazz) {
+        DecodeUtil<T> decodeUtilClazz = new DecodeUtil<>(objectMapper);
 
         return Mono.fromCallable(
                         () -> {
-                            T decodedEvent = decodeUtil.decode(payloadBase64, clazz);
+                            T decodedEvent = decodeUtilClazz.decode(payloadBase64, clazz);
                             OffsetDateTime eventCreatedAt = getCreatedAtFromEvent(decodedEvent);
-                            return createNotification(decodedEvent, event, eventCreatedAt);
+                            return createNotification(decodedEvent, eventCreatedAt);
                         })
                 .onErrorResume(
                         JsonProcessingException.class,
                         e -> {
-                            log.error("Error decoding event of type {}: {}", event.getType(), e.getMessage(), e);
+                            log.error("Error decoding even {}", e.getMessage(), e);
                             return Mono.empty();
                         });
     }
 
     private <T> Notification createNotification(
-            T eventDetails, Event event, OffsetDateTime createdAt) {
+            T eventDetails, OffsetDateTime createdAt) {
         Notification.NotificationData.NotificationDataBuilder dataBuilder =
                 Notification.NotificationData.builder();
+        Notification.NotificationBuilder notificationBuilder = Notification.builder();
 
         if (eventDetails instanceof NewFriendRequestEvent newFriendEvent) {
+            notificationBuilder.userId(newFriendEvent.getRecipientId());
+            notificationBuilder.type(NotificationType.NEW_FRIEND);
             dataBuilder.fromUser(newFriendEvent.getSenderId());
         } else if (eventDetails instanceof MessageMentionedEvent mentionedEvent) {
+            notificationBuilder.userId(mentionedEvent.getRecipientId());
+            notificationBuilder.type(NotificationType.MESSAGE_MENTIONED);
             dataBuilder
                     .fromUser(mentionedEvent.getSenderId())
                     .conversationId(mentionedEvent.getConversationId())
                     .messageId(mentionedEvent.getMessageId());
         } else if (eventDetails instanceof MessageReactedEvent reactedEvent) {
+            notificationBuilder.userId(reactedEvent.getRecipientId());
+            notificationBuilder.type(NotificationType.MESSAGE_REACTED);
             dataBuilder
                     .fromUser(reactedEvent.getSenderId())
                     .conversationId(reactedEvent.getConversationId())
@@ -129,9 +138,7 @@ public class ConsumerBindingConfig {
                     .reactionType(reactedEvent.getReaction());
         }
 
-        return Notification.builder()
-                .userId(event.getUserId())
-                .type(event.getType())
+        return notificationBuilder
                 .status(Status.UNREAD)
                 .createdAt(createdAt)
                 .data(dataBuilder.build())

@@ -1,6 +1,5 @@
 package com.chat.notification_manager.event;
 
-import com.chat.notification_manager.enums.NotificationType;
 import java.time.Instant;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
@@ -15,7 +14,6 @@ import lombok.NoArgsConstructor;
 public class Event {
   // TODO: this one is duplicated across services
 
-  private String userId;
   @Builder.Default private String specVersion = "1.0";
   private NotificationType type;
   @Builder.Default private String id = UUID.randomUUID().toString();

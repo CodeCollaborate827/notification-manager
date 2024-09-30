@@ -18,10 +18,6 @@ spring:
           destination: topic.user.notification
         newNotificationUpstream-out-0:
           destination: topic.user.notification
-        func1-in-0:
-          destination: topic-input
-        func1-out-0:
-          destination: topic-output
       kafka:
         binder:
           brokers: localhost:9092

@@ -55,11 +55,10 @@ public class NotificationServiceImpl implements NotificationService {
   }
 
   @Override
-  public void saveNotification(Notification notification) {
-    notificationRepository
+  public Mono<Notification> saveNotification(Notification notification) {
+    return notificationRepository
         .save(notification)
         .doOnSuccess(savedNotification -> log.info("Notification saved: {}", savedNotification))
-        .doOnError(e -> log.error("Error saving notification: {}", e.getMessage(), e))
-        .subscribe();
+        .doOnError(e -> log.error("Error saving notification: {}", e.getMessage(), e));
   }
 }
