@@ -1,6 +1,6 @@
 package com.chat.notification_manager.repository;
 
-import com.chat.notification_manager.docunent.User;
+import com.chat.notification_manager.document.User;
 import org.springframework.data.mongodb.repository.ReactiveMongoRepository;
 import org.springframework.stereotype.Repository;
 

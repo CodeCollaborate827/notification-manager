@@ -7,17 +7,23 @@ spring:
       database: notification_manager
   cloud:
     function:
-      definition: messageMentionedDownstreamConsumer;messageReactedDownstreamConsumer;newFriendRequestDownstreamConsumer;newNotificationUpstream; func1
+      definition: messageMentioned;messageReacted;newFriendRequest;newNotificationDownstream;userRegistrationUpstreamConsumer
     Stream:
       bindings:
-        messageMentionedDownstreamConsumer-in-0:
-          destination: topic.conversation.notification
-        messageReactedDownstreamConsumer-in-0:
-          destination: topic.conversation.notification
-        newFriendRequestDownstreamConsumer-in-0:
+        messageMentioned-in-0:
+          destination: topic.conversation.message-mentioned
+        messageReacted-in-0:
+          destination: topic.conversation.message-reacted
+        newFriendRequest-in-0:
+          destination: topic.user.new-friend
+        userRegistrationUpstreamConsumer-in-0:
+          destination: topic.user.registration
+        newFriendRequest-out-0:
           destination: topic.user.notification
-        newNotificationUpstream-out-0:
+        messageReacted-out-0:
           destination: topic.user.notification
+        messageMentioned-out-0:
+            destination: topic.user.notification
       kafka:
         binder:
           brokers: localhost:9092

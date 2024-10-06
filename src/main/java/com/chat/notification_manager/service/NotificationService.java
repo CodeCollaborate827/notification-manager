@@ -1,6 +1,6 @@
 package com.chat.notification_manager.service;
 
-import com.chat.notification_manager.docunent.Notification;
+import com.chat.notification_manager.document.Notification;
 import com.chat.notification_manager.dto.response.NotificationDTO;
 import org.springframework.http.ResponseEntity;
 import reactor.core.publisher.Flux;

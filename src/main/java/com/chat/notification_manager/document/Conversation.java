@@ -1,4 +1,4 @@
-package com.chat.notification_manager.docunent;
+package com.chat.notification_manager.document;
 
 import lombok.Data;
 import org.springframework.data.mongodb.core.mapping.Document;

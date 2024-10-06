@@ -1,4 +1,4 @@
-package com.chat.notification_manager.docunent;
+package com.chat.notification_manager.document;
 
 import com.chat.notification_manager.enums.NotificationType;
 import com.chat.notification_manager.enums.Status;

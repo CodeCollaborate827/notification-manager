@@ -15,8 +15,8 @@ public class ProducerBindingConfig {
   public static final Sinks.Many<Message<Event>> newNotificationUpstreamSink =
       Sinks.many().unicast().onBackpressureBuffer();
 
-  @Bean("newNotificationUpstream")
-  public Supplier<Flux<Message<Event>>> newNotificationUpstream() {
+  @Bean("newNotificationDownstream")
+  public Supplier<Flux<Message<Event>>> newNotificationDownstream() {
     return newNotificationUpstreamSink::asFlux;
   }
 }

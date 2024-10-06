@@ -1,10 +1,11 @@
 package com.chat.notification_manager.utils;
 
-import com.chat.notification_manager.docunent.Conversation;
-import com.chat.notification_manager.docunent.Notification;
-import com.chat.notification_manager.docunent.User;
+import com.chat.notification_manager.document.Conversation;
+import com.chat.notification_manager.document.Notification;
+import com.chat.notification_manager.document.User;
 import com.chat.notification_manager.dto.response.NotificationDTO;
 import com.chat.notification_manager.enums.NotificationType;
+import com.chat.notification_manager.event.upstream.UserRegistrationEvent;
 import com.chat.notification_manager.exception.ApplicationException;
 import com.chat.notification_manager.exception.ErrorCode;
 import com.chat.notification_manager.repository.ConversationRepository;
@@ -14,6 +15,8 @@ import reactor.core.publisher.Mono;
 
 @Slf4j
 public class Utils {
+  private Utils() {}
+
   public static Mono<NotificationDTO> mapNotificationToDTO(
       Notification notification,
       UserRepository userRepository,
@@ -53,5 +56,13 @@ public class Utils {
                   .build();
             })
         .switchIfEmpty(Mono.error(new ApplicationException(ErrorCode.NOTIFICATION_ERROR1)));
+  }
+
+  public static User convertToUser(UserRegistrationEvent userRegistrationEvent) {
+    return User.builder()
+        .id(userRegistrationEvent.getUserId())
+        .displayName(userRegistrationEvent.getDisplayName())
+        .profilePicture(userRegistrationEvent.getAvatar())
+        .build();
   }
 }

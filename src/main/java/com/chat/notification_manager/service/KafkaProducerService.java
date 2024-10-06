@@ -1,4 +1,3 @@
 package com.chat.notification_manager.service;
 
-public interface KafkaProducerService {
-}
+public interface KafkaProducerService {}
