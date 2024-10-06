@@ -1,16 +1,16 @@
-package com.chat.notification_manager.docunent;
+package com.chat.notification_manager.document;
 
+import lombok.Builder;
 import lombok.Data;
-import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
 @Data
-@Document(collection = "sender")
-public class Sender {
-  @Id
-  @Field("sender_id")
-  private String senderId;
+@Builder
+@Document(collection = "user")
+public class User {
+  @Field("user_id")
+  private String id;
 
   @Field("display_name")
   private String displayName;
