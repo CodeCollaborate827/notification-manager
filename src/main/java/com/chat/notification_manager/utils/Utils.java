@@ -1,5 +1,6 @@
 package com.chat.notification_manager.utils;
 
+import com.chat.notification_manager.constant.NotificationProperties;
 import com.chat.notification_manager.document.Conversation;
 import com.chat.notification_manager.document.Notification;
 import com.chat.notification_manager.document.User;
@@ -13,6 +14,8 @@ import com.chat.notification_manager.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
 
+import java.util.Map;
+
 @Slf4j
 public class Utils {
   private Utils() {}
@@ -21,12 +24,13 @@ public class Utils {
       Notification notification,
       UserRepository userRepository,
       ConversationRepository conversationRepository) {
-    Notification.NotificationData data = notification.getData();
-    Mono<User> userMono = userRepository.findById(data.getFromUser());
+    Map<String, Object> props = notification.getProperties();
+    Mono<User> userMono = userRepository.findById((String) props.get(NotificationProperties.FROM_USER));
 
     // If conversationId is null, this will return Mono.empty()
     Mono<Conversation> conversationMono =
-        Mono.justOrEmpty(data.getConversationId()).flatMap(conversationRepository::findById);
+        Mono.justOrEmpty((String) props.get(NotificationProperties.CONVERSATION_ID))
+            .flatMap(conversationRepository::findById);
 
     return Mono.zip(userMono, conversationMono.defaultIfEmpty(new Conversation()))
         .map(
@@ -52,6 +56,7 @@ public class Utils {
                           ? user.getProfilePicture()
                           : conversation.getConversationPicture() // Check if conversation exists
                       )
+                  .properties(notification.getProperties())
                   .createdAt(notification.getCreatedAt())
                   .build();
             })

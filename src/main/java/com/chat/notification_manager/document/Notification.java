@@ -2,13 +2,15 @@ package com.chat.notification_manager.document;
 
 import com.chat.notification_manager.enums.NotificationType;
 import com.chat.notification_manager.enums.Status;
-import java.time.OffsetDateTime;
 import lombok.Builder;
 import lombok.Data;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
+
+import java.time.OffsetDateTime;
+import java.util.Map;
 
 @Data
 @Document(collection = "notification")
@@ -29,22 +31,6 @@ public class Notification {
   @CreatedDate
   private OffsetDateTime createdAt; // When the notification was created
 
-  @Field("data")
-  private NotificationData data;
-
-  @Data
-  @Builder
-  public static class NotificationData {
-    @Field("from_user")
-    private String fromUser;
-
-    @Field("conversation_id")
-    private String conversationId;
-
-    @Field("message_id")
-    private String messageId;
-
-    @Field("reaction_type")
-    private String reactionType;
-  }
+  @Field("properties")
+  private Map<String, Object> properties; // Additional data for the notification
 }

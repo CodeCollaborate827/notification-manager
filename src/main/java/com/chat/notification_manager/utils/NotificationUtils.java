@@ -1,5 +1,6 @@
 package com.chat.notification_manager.utils;
 
+import com.chat.notification_manager.constant.NotificationProperties;
 import com.chat.notification_manager.document.Notification;
 import com.chat.notification_manager.document.User;
 import com.chat.notification_manager.dto.response.NotificationDTO;
@@ -14,10 +15,13 @@ import com.chat.notification_manager.exception.ApplicationException;
 import com.chat.notification_manager.exception.ErrorCode;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.time.OffsetDateTime;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.time.OffsetDateTime;
+import java.util.HashMap;
+import java.util.Map;
 
 @Slf4j
 public class NotificationUtils {
@@ -56,35 +60,35 @@ public class NotificationUtils {
   }
 
   private static <T> Notification createNotification(T eventDetails, OffsetDateTime createdAt) {
-    Notification.NotificationData.NotificationDataBuilder dataBuilder =
-        Notification.NotificationData.builder();
     Notification.NotificationBuilder notificationBuilder = Notification.builder();
+    Map<String, Object> properties = new HashMap<>();
 
     if (eventDetails instanceof NewFriendRequestEvent newFriendEvent) {
       notificationBuilder.userId(newFriendEvent.getRecipientId());
       notificationBuilder.type(NotificationType.NEW_FRIEND);
-      dataBuilder.fromUser(newFriendEvent.getSenderId());
+
+      properties.put(NotificationProperties.FROM_USER, newFriendEvent.getSenderId());
     } else if (eventDetails instanceof MessageMentionedEvent mentionedEvent) {
       notificationBuilder.userId(mentionedEvent.getRecipientId());
       notificationBuilder.type(NotificationType.MESSAGE_MENTIONED);
-      dataBuilder
-          .fromUser(mentionedEvent.getSenderId())
-          .conversationId(mentionedEvent.getConversationId())
-          .messageId(mentionedEvent.getMessageId());
+
+      properties.put(NotificationProperties.FROM_USER, mentionedEvent.getSenderId());
+      properties.put(NotificationProperties.CONVERSATION_ID, mentionedEvent.getConversationId());
+      properties.put(NotificationProperties.MESSAGE_ID, mentionedEvent.getMessageId());
     } else if (eventDetails instanceof MessageReactedEvent reactedEvent) {
       notificationBuilder.userId(reactedEvent.getRecipientId());
       notificationBuilder.type(NotificationType.MESSAGE_REACTED);
-      dataBuilder
-          .fromUser(reactedEvent.getSenderId())
-          .conversationId(reactedEvent.getConversationId())
-          .messageId(reactedEvent.getMessageId())
-          .reactionType(reactedEvent.getReaction());
+
+      properties.put(NotificationProperties.FROM_USER, reactedEvent.getSenderId());
+      properties.put(NotificationProperties.CONVERSATION_ID, reactedEvent.getConversationId());
+      properties.put(NotificationProperties.MESSAGE_ID, reactedEvent.getMessageId());
+      properties.put(NotificationProperties.REACTION_TYPE, reactedEvent.getReaction());
     }
 
     return notificationBuilder
         .status(Status.UNREAD)
         .createdAt(createdAt)
-        .data(dataBuilder.build())
+        .properties(properties)
         .build();
   }
 

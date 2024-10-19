@@ -23,7 +23,7 @@ spring:
         messageReacted-out-0:
           destination: topic.user.notification
         messageMentioned-out-0:
-            destination: topic.user.notification
+          destination: topic.user.notification
       kafka:
         binder:
           brokers: localhost:9092
