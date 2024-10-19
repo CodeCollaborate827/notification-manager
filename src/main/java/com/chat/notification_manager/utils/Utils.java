@@ -11,10 +11,9 @@ import com.chat.notification_manager.exception.ApplicationException;
 import com.chat.notification_manager.exception.ErrorCode;
 import com.chat.notification_manager.repository.ConversationRepository;
 import com.chat.notification_manager.repository.UserRepository;
+import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
-
-import java.util.Map;
 
 @Slf4j
 public class Utils {
@@ -25,7 +24,8 @@ public class Utils {
       UserRepository userRepository,
       ConversationRepository conversationRepository) {
     Map<String, Object> props = notification.getProperties();
-    Mono<User> userMono = userRepository.findById((String) props.get(NotificationProperties.FROM_USER));
+    Mono<User> userMono =
+        userRepository.findById((String) props.get(NotificationProperties.FROM_USER));
 
     // If conversationId is null, this will return Mono.empty()
     Mono<Conversation> conversationMono =

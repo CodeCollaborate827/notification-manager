@@ -2,15 +2,14 @@ package com.chat.notification_manager.document;
 
 import com.chat.notification_manager.enums.NotificationType;
 import com.chat.notification_manager.enums.Status;
+import java.time.OffsetDateTime;
+import java.util.Map;
 import lombok.Builder;
 import lombok.Data;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
-
-import java.time.OffsetDateTime;
-import java.util.Map;
 
 @Data
 @Document(collection = "notification")

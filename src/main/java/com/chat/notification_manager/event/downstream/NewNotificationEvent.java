@@ -1,13 +1,12 @@
 package com.chat.notification_manager.event.downstream;
 
 import com.chat.notification_manager.enums.NotificationType;
+import java.time.OffsetDateTime;
+import java.util.Map;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.time.OffsetDateTime;
-import java.util.Map;
 
 @Data
 @NoArgsConstructor

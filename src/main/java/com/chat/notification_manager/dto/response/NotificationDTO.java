@@ -2,11 +2,10 @@ package com.chat.notification_manager.dto.response;
 
 import com.chat.notification_manager.enums.NotificationType;
 import com.chat.notification_manager.enums.Status;
-import lombok.Builder;
-import lombok.Data;
-
 import java.time.OffsetDateTime;
 import java.util.Map;
+import lombok.Builder;
+import lombok.Data;
 
 @Data
 @Builder
