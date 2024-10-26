@@ -2,8 +2,8 @@ package com.chat.notification_manager.document;
 
 import com.chat.notification_manager.enums.NotificationType;
 import com.chat.notification_manager.enums.Status;
+import com.chat.notification_manager.model.NotificationProperties;
 import java.time.OffsetDateTime;
-import java.util.Map;
 import lombok.Builder;
 import lombok.Data;
 import org.springframework.data.annotation.CreatedDate;
@@ -31,5 +31,5 @@ public class Notification {
   private OffsetDateTime createdAt; // When the notification was created
 
   @Field("properties")
-  private Map<String, Object> properties; // Additional data for the notification
+  private NotificationProperties properties; // Additional data for the notification
 }

@@ -8,7 +8,7 @@ import org.springframework.data.mongodb.core.mapping.Field;
 @Document(collection = "conversation")
 public class Conversation {
   @Field("conversation_id")
-  private String conversationId;
+  private String id;
 
   @Field("conversation_name")
   private String conversationName;

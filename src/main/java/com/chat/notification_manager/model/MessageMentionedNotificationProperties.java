@@ -1,7 +1,12 @@
 package com.chat.notification_manager.model;
 
-public class MessageMentionedNotificationProperties {
+import lombok.Builder;
+import lombok.Data;
+
+@Data
+@Builder
+public class MessageMentionedNotificationProperties extends NotificationProperties {
   private String senderId;
   private String messageId;
-  private String messageContent;
+  private String conversationId;
 }

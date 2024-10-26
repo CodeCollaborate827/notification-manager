@@ -1,8 +1,13 @@
 package com.chat.notification_manager.model;
 
-public class MessageReactedNotificationProperties {
-  private String reaction;
-  private String reactorId;
+import lombok.Builder;
+import lombok.Data;
+
+@Data
+@Builder
+public class MessageReactedNotificationProperties extends NotificationProperties {
+  private String reactionType;
+  private String senderId;
   private String messageId;
-  private String messageContent;
+  private String conversationId;
 }
