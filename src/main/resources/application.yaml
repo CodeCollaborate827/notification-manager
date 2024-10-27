@@ -3,10 +3,33 @@ spring:
     name: notification-manager
   data:
     mongodb:
-      uri: mongodb://localhost:27017/notification_manager
+      uri: mongodb://localhost:27017
+      database: notification_manager
+  cloud:
+    function:
+      definition: messageMentioned;messageReacted;newFriendRequest;userRegistrationUpstreamConsumer
+    Stream:
+      bindings:
+        messageMentioned-in-0:
+          destination: topic.conversation.message-mentioned
+        messageReacted-in-0:
+          destination: topic.conversation.message-reacted
+        newFriendRequest-in-0:
+          destination: topic.user.new-friend
+        userRegistrationUpstreamConsumer-in-0:
+          destination: topic.user.registration
+        newFriendRequest-out-0:
+          destination: topic.user.notification
+        messageReacted-out-0:
+          destination: topic.user.notification
+        messageMentioned-out-0:
+          destination: topic.user.notification
+      kafka:
+        binder:
+          brokers: localhost:9092
 server:
   port: 8084
-#eureka:
-#  client:
-#    service-url:
-#      defaultZone: http://localhost:8761/eureka/
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
