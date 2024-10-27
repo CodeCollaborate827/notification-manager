@@ -30,7 +30,7 @@ public class NotificationController {
       })
   @ApiResponse(responseCode = "404", description = "Notifications not found", content = @Content)
   @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content)
-  @GetMapping("/allNotifications/{receiverId}")
+  @GetMapping("/allNotifications")
   // TODO: add from and to query parameters for paging(limit 20 notifications)
   public Flux<ResponseEntity<NotificationDTO>> getAllNotifications(@RequestHeader String userId) {
     return notificationService.getAllNotifications(userId);
@@ -50,7 +50,7 @@ public class NotificationController {
       description = "Read notifications not found",
       content = @Content)
   @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content)
-  @GetMapping("/getAllReadNotifications/{userId}")
+  @GetMapping("/getAllReadNotifications")
   public Flux<ResponseEntity<NotificationDTO>> getAllReadNotifications(
       @RequestHeader String userId) {
     return notificationService.getAllReadNotifications(userId);

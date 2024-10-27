@@ -1,10 +1,11 @@
 package com.chat.notification_manager.event.upstream;
 
-import java.time.OffsetDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.time.OffsetDateTime;
 
 @Data
 @NoArgsConstructor
@@ -22,8 +23,8 @@ public class UserRegistrationEvent {
   private String avatar;
 
   public enum Gender {
-    male,
-    female,
-    other
+    MALE,
+    FEMALE,
+    OTHER
   }
 }
