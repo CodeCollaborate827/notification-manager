@@ -8,6 +8,8 @@ import com.chat.notification_manager.enums.NotificationType;
 import com.chat.notification_manager.event.upstream.UserRegistrationEvent;
 import lombok.extern.slf4j.Slf4j;
 
+import java.time.OffsetDateTime;
+
 @Slf4j
 public class Utils {
   private Utils() {}
@@ -40,5 +42,9 @@ public class Utils {
         .displayName(userRegistrationEvent.getDisplayName())
         .profilePicture(userRegistrationEvent.getAvatar())
         .build();
+  }
+
+  public static OffsetDateTime convertEpochToOffsetDateTime(long epoch) {
+    return OffsetDateTime.ofInstant(java.time.Instant.ofEpochMilli(epoch), java.time.ZoneOffset.UTC);
   }
 }

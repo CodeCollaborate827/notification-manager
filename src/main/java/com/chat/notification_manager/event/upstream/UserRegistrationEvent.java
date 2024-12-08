@@ -5,8 +5,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.OffsetDateTime;
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -16,7 +14,7 @@ public class UserRegistrationEvent {
   private String username;
   private String displayName;
   private String email;
-  private OffsetDateTime createdAt;
+  private Long createdAt;
   private String city;
   private String dateOfBirth;
   private Gender gender;
