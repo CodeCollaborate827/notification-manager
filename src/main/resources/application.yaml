@@ -11,19 +11,19 @@ spring:
     Stream:
       bindings:
         messageMentioned-in-0:
-          destination: topic.conversation.message-mentioned
+          destination: topic.message.mentioned
         messageReacted-in-0:
-          destination: topic.conversation.message-reacted
+          destination: topic.message.reacted
         newFriendRequest-in-0:
           destination: topic.user.new-friend
         userRegistrationUpstreamConsumer-in-0:
           destination: topic.user.registration
         newFriendRequest-out-0:
-          destination: topic.user.notification
+          destination: topic.notification.events
         messageReacted-out-0:
-          destination: topic.user.notification
+          destination: topic.notification.events
         messageMentioned-out-0:
-          destination: topic.user.notification
+          destination: topic.notification.events
       kafka:
         binder:
           brokers: localhost:9092
