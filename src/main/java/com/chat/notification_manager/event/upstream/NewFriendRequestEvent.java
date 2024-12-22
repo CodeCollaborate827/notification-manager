@@ -1,6 +1,5 @@
 package com.chat.notification_manager.event.upstream;
 
-import java.time.OffsetDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -13,5 +12,5 @@ import lombok.NoArgsConstructor;
 public class NewFriendRequestEvent {
   private String senderId;
   private String recipientId;
-  private OffsetDateTime createdAt;
+  private Long createdAt;
 }

@@ -16,10 +16,11 @@ import com.chat.notification_manager.model.MessageMentionedNotificationPropertie
 import com.chat.notification_manager.model.MessageReactedNotificationProperties;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.time.OffsetDateTime;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.time.OffsetDateTime;
 
 @Slf4j
 public class NotificationUtils {
@@ -59,9 +60,9 @@ public class NotificationUtils {
 
   private static <T> OffsetDateTime getCreatedAtFromEvent(T eventDetails) {
     return switch (eventDetails) {
-      case NewFriendRequestEvent newFriendRequestEvent -> newFriendRequestEvent.getCreatedAt();
-      case MessageMentionedEvent messageMentionedEvent -> messageMentionedEvent.getCreatedAt();
-      case MessageReactedEvent messageReactedEvent -> messageReactedEvent.getCreatedAt();
+      case NewFriendRequestEvent newFriendRequestEvent -> Utils.convertEpochToOffsetDateTime(newFriendRequestEvent.getCreatedAt());
+      case MessageMentionedEvent messageMentionedEvent -> Utils.convertEpochToOffsetDateTime(messageMentionedEvent.getCreatedAt());
+      case MessageReactedEvent messageReactedEvent -> Utils.convertEpochToOffsetDateTime(messageReactedEvent.getCreatedAt());
       case null, default -> OffsetDateTime.now();
     };
   }
