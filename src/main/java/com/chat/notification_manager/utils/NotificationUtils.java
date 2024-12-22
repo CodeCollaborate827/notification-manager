@@ -15,39 +15,43 @@ import com.chat.notification_manager.model.AddFriendNotificationProperties;
 import com.chat.notification_manager.model.MessageMentionedNotificationProperties;
 import com.chat.notification_manager.model.MessageReactedNotificationProperties;
 import com.chat.notification_manager.model.NotificationProperties;
-import lombok.extern.slf4j.Slf4j;
-
 import java.time.Instant;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class NotificationUtils {
 
   private record NotificationDetails(
-          String userId, NotificationType type, NotificationProperties properties) {}
+      String userId, NotificationType type, NotificationProperties properties) {}
 
   public static NotificationDTO createNotificationDTO(
-          Notification notification, User user, Conversation conversation) {
+      Notification notification, User user, Conversation conversation) {
 
-    String title = NotificationMessageGenerator.generateTitle(notification.getType(), user, conversation);
-    String content = NotificationMessageGenerator.generateContent(notification.getType(), user, conversation);
-    String imageUrl = notification.getType().equals(NotificationType.NOTIFICATION_NEW_FRIEND_REQUEST)
+    String title =
+        NotificationMessageGenerator.generateTitle(notification.getType(), user, conversation);
+    String content =
+        NotificationMessageGenerator.generateContent(notification.getType(), user, conversation);
+    String imageUrl =
+        notification.getType().equals(NotificationType.NOTIFICATION_NEW_FRIEND_REQUEST)
             ? user.getProfilePicture()
             : conversation.getConversationPicture(); // Check if conversation exists
 
     return NotificationDTO.builder()
-            .id(notification.getId())
-            .userId(notification.getUserId())
-            .title(title)
-            .content(content)
-            .status(notification.getStatus())
-            .imageUrl(imageUrl)
-            .properties(notification.getProperties())
-            .createdAt(notification.getCreatedAt())
-            .build();
+        .id(notification.getId())
+        .type(notification.getType())
+        .userId(notification.getUserId())
+        .title(title)
+        .content(content)
+        .status(notification.getStatus())
+        .imageUrl(imageUrl)
+        .properties(notification.getProperties())
+        .createdAt(notification.getCreatedAt())
+        .build();
   }
 
   public static NotificationEvent createNotificationEvent(NotificationDTO notification) {
-    NotificationEvent build = NotificationEvent.builder()
+    NotificationEvent build =
+        NotificationEvent.builder()
             .messageType(notification.getType())
             .recipientId(notification.getUserId())
             .notificationId(notification.getId())
@@ -58,33 +62,38 @@ public class NotificationUtils {
   }
 
   public static Notification createNotification(MessageMentionedEvent messageMentionedEvent) {
-    NotificationDetails notificationDetails = new NotificationDetails(
+    NotificationDetails notificationDetails =
+        new NotificationDetails(
             messageMentionedEvent.getRecipientId(),
             NotificationType.NOTIFICATION_MESSAGE_MENTIONED,
             MessageMentionedNotificationProperties.builder()
-                    .senderId(messageMentionedEvent.getSenderId())
-                    .conversationId(messageMentionedEvent.getConversationId())
-                    .messageId(messageMentionedEvent.getMessageId())
-                    .build());
+                .senderId(messageMentionedEvent.getSenderId())
+                .conversationId(messageMentionedEvent.getConversationId())
+                .messageId(messageMentionedEvent.getMessageId())
+                .build());
 
     return createNotificationFromDetails(notificationDetails);
   }
 
   public static Notification createNotification(MessageReactedEvent messageReactedEvent) {
-    NotificationDetails notificationDetails = new NotificationDetails(
+    NotificationDetails notificationDetails =
+        new NotificationDetails(
             messageReactedEvent.getSenderId(),
             NotificationType.NOTIFICATION_MESSAGE_REACTED,
             MessageReactedNotificationProperties.builder()
-                    .senderId(messageReactedEvent.getSenderId())
-                    .conversationId(messageReactedEvent.getConversationId())
-                    .messageId(messageReactedEvent.getMessageId())
-                    .reaction(MessageReactedEvent.Reaction.getReaction(messageReactedEvent.getReaction().name()))
-                    .build());
+                .senderId(messageReactedEvent.getSenderId())
+                .conversationId(messageReactedEvent.getConversationId())
+                .messageId(messageReactedEvent.getMessageId())
+                .reaction(
+                    MessageReactedEvent.Reaction.getReaction(
+                        messageReactedEvent.getReaction().name()))
+                .build());
     return createNotificationFromDetails(notificationDetails);
   }
 
   public static Notification createNotification(NewFriendRequestEvent event) {
-    NotificationDetails notificationDetails = new NotificationDetails(
+    NotificationDetails notificationDetails =
+        new NotificationDetails(
             event.getRecipientId(),
             NotificationType.NOTIFICATION_NEW_FRIEND_REQUEST,
             AddFriendNotificationProperties.builder().senderId(event.getSenderId()).build());
@@ -92,7 +101,8 @@ public class NotificationUtils {
   }
 
   public static Notification createNotification(FriendRequestAcceptedEvent event) {
-    NotificationDetails notificationDetails = new NotificationDetails(
+    NotificationDetails notificationDetails =
+        new NotificationDetails(
             event.getSenderId(),
             NotificationType.NOTIFICATION_FRIEND_REQUEST_ACCEPTED,
             AddFriendNotificationProperties.builder().senderId(event.getSenderId()).build());
@@ -102,11 +112,11 @@ public class NotificationUtils {
   public static String getSenderIdFromNotificationProps(Notification notification) {
     return switch (notification.getType()) {
       case NOTIFICATION_NEW_FRIEND_REQUEST ->
-              ((AddFriendNotificationProperties) notification.getProperties()).getSenderId();
+          ((AddFriendNotificationProperties) notification.getProperties()).getSenderId();
       case NOTIFICATION_MESSAGE_MENTIONED ->
-              ((MessageMentionedNotificationProperties) notification.getProperties()).getSenderId();
+          ((MessageMentionedNotificationProperties) notification.getProperties()).getSenderId();
       case NOTIFICATION_MESSAGE_REACTED ->
-              ((MessageReactedNotificationProperties) notification.getProperties()).getSenderId();
+          ((MessageReactedNotificationProperties) notification.getProperties()).getSenderId();
       default -> null;
     };
   }
@@ -114,19 +124,23 @@ public class NotificationUtils {
   public static String getConversationIdFromNotificationProps(Notification notification) {
     return switch (notification.getType()) {
       case NOTIFICATION_NEW_FRIEND_REQUEST -> null;
-      case NOTIFICATION_MESSAGE_MENTIONED -> ((MessageMentionedNotificationProperties) notification.getProperties())
+      case NOTIFICATION_MESSAGE_MENTIONED ->
+          ((MessageMentionedNotificationProperties) notification.getProperties())
               .getConversationId();
-      case NOTIFICATION_MESSAGE_REACTED -> ((MessageReactedNotificationProperties) notification.getProperties()).getConversationId();
+      case NOTIFICATION_MESSAGE_REACTED ->
+          ((MessageReactedNotificationProperties) notification.getProperties()).getConversationId();
       default -> null;
     };
   }
-  private static Notification createNotificationFromDetails(NotificationDetails notificationDetails) {
+
+  private static Notification createNotificationFromDetails(
+      NotificationDetails notificationDetails) {
     return Notification.builder()
-            .userId(notificationDetails.userId())
-            .type(notificationDetails.type())
-            .properties(notificationDetails.properties())
-            .status(Status.UNREAD)
-            .createdAt(Instant.now().getEpochSecond())
-            .build();
+        .userId(notificationDetails.userId())
+        .type(notificationDetails.type())
+        .properties(notificationDetails.properties())
+        .status(Status.UNREAD)
+        .createdAt(Instant.now().getEpochSecond())
+        .build();
   }
 }

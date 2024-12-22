@@ -10,11 +10,14 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class FriendRequestAcceptedEvent {
-    public enum Status {
-        PENDING, ACCEPTED, DENIED
-    }
-    private String senderId;
-    private String recipientId;
-    private Status status;
-    private Long timestamp;
+  public enum Status {
+    PENDING,
+    ACCEPTED,
+    DENIED
+  }
+
+  private String senderId;
+  private String recipientId;
+  private Status status;
+  private Long timestamp;
 }

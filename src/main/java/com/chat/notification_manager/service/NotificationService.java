@@ -22,8 +22,9 @@ public interface NotificationService {
 
   Mono<NotificationEvent> processMessageReactedEvent(MessageReactedEvent messageReactedEvent);
 
-  Mono<NotificationEvent> processFriendRequestNotification(NewFriendRequestEvent newFriendRequestEvent);
+  Mono<NotificationEvent> processFriendRequestNotification(
+      NewFriendRequestEvent newFriendRequestEvent);
 
-  Mono<NotificationEvent> processFriendRequestAcceptedNotification(FriendRequestAcceptedEvent friendRequestAcceptedEvent);
-
+  Mono<NotificationEvent> processFriendRequestAcceptedNotification(
+      FriendRequestAcceptedEvent friendRequestAcceptedEvent);
 }

@@ -11,8 +11,8 @@ import lombok.NoArgsConstructor;
 @Builder
 @Data
 public class NotificationEvent {
-    private NotificationType messageType;
-    private String notificationId;
-    private String recipientId;
-    private Object data;
+  private NotificationType messageType;
+  private String notificationId;
+  private String recipientId;
+  private Object data;
 }

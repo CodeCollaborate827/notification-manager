@@ -18,14 +18,13 @@ import com.chat.notification_manager.repository.NotificationRepository;
 import com.chat.notification_manager.repository.UserRepository;
 import com.chat.notification_manager.service.NotificationService;
 import com.chat.notification_manager.utils.NotificationUtils;
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
-import java.util.Objects;
 
 @Slf4j
 @Service
@@ -52,7 +51,8 @@ public class NotificationServiceImpl implements NotificationService {
                                     notification))))
                     .mapNotNull(
                         tuple ->
-                                NotificationUtils.createNotificationDTO(notification, tuple.getT1(), tuple.getT2()))
+                            NotificationUtils.createNotificationDTO(
+                                notification, tuple.getT1(), tuple.getT2()))
                     .map(ResponseEntity::ok)
                     .switchIfEmpty(
                         Mono.error(new ApplicationException(ErrorCode.NOTIFICATION_ERROR1))));
@@ -74,7 +74,8 @@ public class NotificationServiceImpl implements NotificationService {
                                     notification))))
                     .mapNotNull(
                         tuple ->
-                            NotificationUtils.createNotificationDTO(notification, tuple.getT1(), tuple.getT2()))
+                            NotificationUtils.createNotificationDTO(
+                                notification, tuple.getT1(), tuple.getT2()))
                     .map(ResponseEntity::ok)
                     .switchIfEmpty(
                         Mono.error(new ApplicationException(ErrorCode.NOTIFICATION_ERROR1))));
@@ -89,61 +90,63 @@ public class NotificationServiceImpl implements NotificationService {
   }
 
   @Override
-  public Mono<NotificationEvent> processMessageMentionedEvent(MessageMentionedEvent messageMentionedEvent) {
+  public Mono<NotificationEvent> processMessageMentionedEvent(
+      MessageMentionedEvent messageMentionedEvent) {
     Notification notification = NotificationUtils.createNotification(messageMentionedEvent);
-    return saveNotification(notification)
-            .flatMap(this::createMessageMentionedEvent);
+    return saveNotification(notification).flatMap(this::createMessageMentionedEvent);
   }
 
   @Override
-  public Mono<NotificationEvent> processMessageReactedEvent(MessageReactedEvent messageReactedEvent) {
+  public Mono<NotificationEvent> processMessageReactedEvent(
+      MessageReactedEvent messageReactedEvent) {
     Notification notification = NotificationUtils.createNotification(messageReactedEvent);
-    return saveNotification(notification)
-            .flatMap(this::createMessageReactedEvent);
+    return saveNotification(notification).flatMap(this::createMessageReactedEvent);
   }
 
   @Override
-  public Mono<NotificationEvent> processFriendRequestNotification(NewFriendRequestEvent newFriendRequestEvent) {
+  public Mono<NotificationEvent> processFriendRequestNotification(
+      NewFriendRequestEvent newFriendRequestEvent) {
     Notification notification = NotificationUtils.createNotification(newFriendRequestEvent);
-    return saveNotification(notification)
-            .flatMap(this::createFriendRequestEvent);
+    return saveNotification(notification).flatMap(this::createFriendRequestEvent);
   }
 
   @Override
-  public Mono<NotificationEvent> processFriendRequestAcceptedNotification(FriendRequestAcceptedEvent friendRequestAcceptedEvent) {
+  public Mono<NotificationEvent> processFriendRequestAcceptedNotification(
+      FriendRequestAcceptedEvent friendRequestAcceptedEvent) {
     Notification notification = NotificationUtils.createNotification(friendRequestAcceptedEvent);
-    return saveNotification(notification)
-            .flatMap(this::createFriendRequestEvent);
-
+    return saveNotification(notification).flatMap(this::createFriendRequestEvent);
   }
 
   private Mono<NotificationEvent> createMessageReactedEvent(Notification notification) {
     MessageReactedNotificationProperties properties =
-            (MessageReactedNotificationProperties) notification.getProperties();
+        (MessageReactedNotificationProperties) notification.getProperties();
     return Mono.zip(
-                    userRepository.findById(properties.getSenderId()),
-                    conversationRepository.findById(properties.getConversationId()))
-            .map(tuple -> NotificationUtils.createNotificationDTO(notification, tuple.getT1(), tuple.getT2()))
-            .map(NotificationUtils::createNotificationEvent);
+            userRepository.findById(properties.getSenderId()),
+            conversationRepository.findById(properties.getConversationId()))
+        .map(
+            tuple ->
+                NotificationUtils.createNotificationDTO(notification, tuple.getT1(), tuple.getT2()))
+        .map(NotificationUtils::createNotificationEvent);
   }
 
   private Mono<NotificationEvent> createFriendRequestEvent(Notification notification) {
     AddFriendNotificationProperties properties =
-            (AddFriendNotificationProperties) notification.getProperties();
+        (AddFriendNotificationProperties) notification.getProperties();
     return userRepository
-            .findById(properties.getSenderId())
-            .map(user -> NotificationUtils.createNotificationDTO(notification, user, null))
-            .map(NotificationUtils::createNotificationEvent);
-
+        .findById(properties.getSenderId())
+        .map(user -> NotificationUtils.createNotificationDTO(notification, user, null))
+        .map(NotificationUtils::createNotificationEvent);
   }
 
   private Mono<NotificationEvent> createMessageMentionedEvent(Notification notification) {
     MessageMentionedNotificationProperties properties =
-            (MessageMentionedNotificationProperties) notification.getProperties();
+        (MessageMentionedNotificationProperties) notification.getProperties();
     return Mono.zip(
-                    userRepository.findById(properties.getSenderId()),
-                    conversationRepository.findById(properties.getConversationId()))
-            .map(tuple -> NotificationUtils.createNotificationDTO(notification, tuple.getT1(), tuple.getT2()))
-            .map(NotificationUtils::createNotificationEvent);
+            userRepository.findById(properties.getSenderId()),
+            conversationRepository.findById(properties.getConversationId()))
+        .map(
+            tuple ->
+                NotificationUtils.createNotificationDTO(notification, tuple.getT1(), tuple.getT2()))
+        .map(NotificationUtils::createNotificationEvent);
   }
 }

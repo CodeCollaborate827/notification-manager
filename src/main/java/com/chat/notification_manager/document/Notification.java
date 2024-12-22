@@ -3,13 +3,12 @@ package com.chat.notification_manager.document;
 import com.chat.notification_manager.enums.NotificationType;
 import com.chat.notification_manager.enums.Status;
 import com.chat.notification_manager.model.NotificationProperties;
+import java.time.Instant;
 import lombok.Builder;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
-
-import java.time.Instant;
 
 @Data
 @Document(collection = "notification")

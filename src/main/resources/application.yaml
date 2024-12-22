@@ -7,22 +7,26 @@ spring:
       database: notification_manager
   cloud:
     function:
-      definition: messageMentioned;messageReacted;newFriendRequest;userRegistrationUpstreamConsumer
-    Stream:
+      definition: userRegistrationUpstreamConsumer; handleMessageMentionedEvent; handleMessageReactedEvent; handleNewFriendRequestEvent; handleFriendRequestAcceptedEvent
+    stream:
       bindings:
-        messageMentioned-in-0:
-          destination: topic.message.mentioned
-        messageReacted-in-0:
-          destination: topic.message.reacted
-        newFriendRequest-in-0:
-          destination: topic.user.new-friend
         userRegistrationUpstreamConsumer-in-0:
           destination: topic.user.registration
-        newFriendRequest-out-0:
+        handleMessageMentionedEvent-in-0:
+          destination: topic.message.mentioned
+        handleMessageReactedEvent-in-0:
+          destination: topic.message.reacted
+        handleNewFriendRequestEvent-in-0:
+          destination: topic.user.friend.request.new
+        handleFriendRequestAcceptedEvent-in-0:
+          destination: topic.user.friend.request.accepted
+        handleMessageMentionedEvent-out-0:
           destination: topic.notification.events
-        messageReacted-out-0:
+        handleMessageReactedEvent-out-0:
           destination: topic.notification.events
-        messageMentioned-out-0:
+        handleNewFriendRequestEvent-out-0:
+          destination: topic.notification.events
+        handleFriendRequestAcceptedEvent-out-0:
           destination: topic.notification.events
       kafka:
         binder:
