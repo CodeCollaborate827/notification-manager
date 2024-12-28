@@ -1,27 +1,22 @@
-package com.chat.notification_manager.document;
+package com.chat.notification_manager.event.upstream.conversation;
 
 import com.chat.notification_manager.enums.ConversationType;
 import com.chat.notification_manager.model.ConversationMember;
-import java.time.OffsetDateTime;
 import java.util.Map;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
+import lombok.NoArgsConstructor;
 
 @Data
-@Document(collection = "conversation")
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
-public class Conversation {
-  @Id private String id;
-
+public class NewConversationEventData {
+  private String conversationId;
   private Map<String, ConversationMember> memberDetails;
-
   private ConversationType conversationType;
-
   private String groupConversationName;
-
   private String groupConversationAvatar;
-
-  @Builder.Default private Long createdAt = OffsetDateTime.now().toEpochSecond();
+  private Long createdAt;
 }

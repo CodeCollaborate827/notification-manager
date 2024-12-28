@@ -1,4 +1,4 @@
-package com.chat.notification_manager.event.upstream;
+package com.chat.notification_manager.event.upstream.userContact;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class FriendRequestAcceptedEvent {
+public class FriendRequestAcceptedEventData {
   public enum Status {
     PENDING,
     ACCEPTED,

@@ -1,7 +1,7 @@
 package com.chat.notification_manager.service.implementation;
 
 import com.chat.notification_manager.document.User;
-import com.chat.notification_manager.event.upstream.UserRegistrationEvent;
+import com.chat.notification_manager.event.upstream.userAccount.UserRegistrationEventData;
 import com.chat.notification_manager.repository.UserRepository;
 import com.chat.notification_manager.service.UserService;
 import com.chat.notification_manager.utils.Utils;
@@ -25,7 +25,7 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
-  public Mono<User> processUserRegistrationEvent(UserRegistrationEvent userRegistrationEvent) {
+  public Mono<User> processUserRegistrationEvent(UserRegistrationEventData userRegistrationEvent) {
     User user = Utils.convertToUser(userRegistrationEvent);
     return save(user);
   }

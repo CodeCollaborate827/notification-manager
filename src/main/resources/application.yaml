@@ -7,11 +7,15 @@ spring:
       database: notification_manager
   cloud:
     function:
-      definition: userRegistrationUpstreamConsumer; handleMessageMentionedEvent; handleMessageReactedEvent; handleNewFriendRequestEvent; handleFriendRequestAcceptedEvent
+      definition: userRegistrationUpstreamConsumer; handleMessageMentionedEvent; handleMessageReactedEvent; handleNewFriendRequestEvent; handleFriendRequestAcceptedEvent; handleConversationEvent
     stream:
+      # messsage events, conversation events
       bindings:
         userRegistrationUpstreamConsumer-in-0:
           destination: topic.user.registration
+        handleConversationEvent-in-0:
+          destination: topic.conversation.events
+        # message events
         handleMessageMentionedEvent-in-0:
           destination: topic.message.mentioned
         handleMessageReactedEvent-in-0:

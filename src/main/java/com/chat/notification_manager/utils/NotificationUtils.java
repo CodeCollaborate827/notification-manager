@@ -4,18 +4,20 @@ import com.chat.notification_manager.document.Conversation;
 import com.chat.notification_manager.document.Notification;
 import com.chat.notification_manager.document.User;
 import com.chat.notification_manager.dto.response.NotificationDTO;
+import com.chat.notification_manager.enums.MessageReaction;
 import com.chat.notification_manager.enums.NotificationType;
 import com.chat.notification_manager.enums.Status;
 import com.chat.notification_manager.event.downstream.NotificationEvent;
-import com.chat.notification_manager.event.upstream.FriendRequestAcceptedEvent;
-import com.chat.notification_manager.event.upstream.MessageMentionedEvent;
-import com.chat.notification_manager.event.upstream.MessageReactedEvent;
-import com.chat.notification_manager.event.upstream.NewFriendRequestEvent;
+import com.chat.notification_manager.event.upstream.message.MessageMentionedEventData;
+import com.chat.notification_manager.event.upstream.message.MessageReactedEventData;
+import com.chat.notification_manager.event.upstream.userContact.FriendRequestAcceptedEventData;
+import com.chat.notification_manager.event.upstream.userContact.NewFriendRequestEventData;
 import com.chat.notification_manager.model.AddFriendNotificationProperties;
 import com.chat.notification_manager.model.MessageMentionedNotificationProperties;
 import com.chat.notification_manager.model.MessageReactedNotificationProperties;
 import com.chat.notification_manager.model.NotificationProperties;
 import java.time.Instant;
+import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -25,16 +27,18 @@ public class NotificationUtils {
       String userId, NotificationType type, NotificationProperties properties) {}
 
   public static NotificationDTO createNotificationDTO(
-      Notification notification, User user, Conversation conversation) {
+      Notification notification, User sender, Conversation conversation) {
 
+    String conversationName =
+        ConversationUtils.getConversationName(conversation, notification.getUserId(), null);
+    List<String> conversationAvatar =
+        ConversationUtils.getConversationAvatar(conversation, notification.getUserId(), null);
     String title =
-        NotificationMessageGenerator.generateTitle(notification.getType(), user, conversation);
+        NotificationMessageGenerator.generateTitle(
+            notification.getType(), sender, conversationName);
     String content =
-        NotificationMessageGenerator.generateContent(notification.getType(), user, conversation);
-    String imageUrl =
-        notification.getType().equals(NotificationType.NOTIFICATION_NEW_FRIEND_REQUEST)
-            ? user.getProfilePicture()
-            : conversation.getConversationPicture(); // Check if conversation exists
+        NotificationMessageGenerator.generateContent(
+            notification.getType(), sender, conversationName);
 
     return NotificationDTO.builder()
         .id(notification.getId())
@@ -43,7 +47,7 @@ public class NotificationUtils {
         .title(title)
         .content(content)
         .status(notification.getStatus())
-        .imageUrl(imageUrl)
+        .imageUrl(conversationAvatar)
         .properties(notification.getProperties())
         .createdAt(notification.getCreatedAt())
         .build();
@@ -61,7 +65,7 @@ public class NotificationUtils {
     return build;
   }
 
-  public static Notification createNotification(MessageMentionedEvent messageMentionedEvent) {
+  public static Notification createNotification(MessageMentionedEventData messageMentionedEvent) {
     NotificationDetails notificationDetails =
         new NotificationDetails(
             messageMentionedEvent.getRecipientId(),
@@ -75,7 +79,7 @@ public class NotificationUtils {
     return createNotificationFromDetails(notificationDetails);
   }
 
-  public static Notification createNotification(MessageReactedEvent messageReactedEvent) {
+  public static Notification createNotification(MessageReactedEventData messageReactedEvent) {
     NotificationDetails notificationDetails =
         new NotificationDetails(
             messageReactedEvent.getSenderId(),
@@ -85,13 +89,12 @@ public class NotificationUtils {
                 .conversationId(messageReactedEvent.getConversationId())
                 .messageId(messageReactedEvent.getMessageId())
                 .reaction(
-                    MessageReactedEvent.Reaction.getReaction(
-                        messageReactedEvent.getReaction().name()))
+                    MessageReaction.getMessageReaction(messageReactedEvent.getReaction().name()))
                 .build());
     return createNotificationFromDetails(notificationDetails);
   }
 
-  public static Notification createNotification(NewFriendRequestEvent event) {
+  public static Notification createNotification(NewFriendRequestEventData event) {
     NotificationDetails notificationDetails =
         new NotificationDetails(
             event.getRecipientId(),
@@ -100,7 +103,7 @@ public class NotificationUtils {
     return createNotificationFromDetails(notificationDetails);
   }
 
-  public static Notification createNotification(FriendRequestAcceptedEvent event) {
+  public static Notification createNotification(FriendRequestAcceptedEventData event) {
     NotificationDetails notificationDetails =
         new NotificationDetails(
             event.getSenderId(),

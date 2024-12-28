@@ -1,6 +1,5 @@
 package com.chat.notification_manager.utils;
 
-import com.chat.notification_manager.document.Conversation;
 import com.chat.notification_manager.document.User;
 import com.chat.notification_manager.enums.NotificationType;
 
@@ -27,9 +26,8 @@ public class NotificationMessageGenerator {
   private NotificationMessageGenerator() {}
 
   public static String generateTitle(
-      NotificationType type, User fromUser, Conversation conversation) {
+      NotificationType type, User fromUser, String conversationName) {
     String displayName = extractDisplayName(fromUser);
-    String conversationName = extractConversationName(conversation);
 
     return switch (type) {
       case NOTIFICATION_NEW_FRIEND_REQUEST -> NEW_FRIEND_REQUEST_TITLE.formatted(displayName);
@@ -42,9 +40,8 @@ public class NotificationMessageGenerator {
   }
 
   public static String generateContent(
-      NotificationType type, User fromUser, Conversation conversation) {
+      NotificationType type, User fromUser, String conversationName) {
     String displayName = extractDisplayName(fromUser);
-    String conversationName = extractConversationName(conversation);
 
     return switch (type) {
       case NOTIFICATION_NEW_FRIEND_REQUEST -> NEW_FRIEND_REQUEST_CONTENT.formatted(displayName);
@@ -61,12 +58,5 @@ public class NotificationMessageGenerator {
       return user.getDisplayName();
     }
     return DEFAULT_DISPLAY_NAME;
-  }
-
-  private static String extractConversationName(Conversation conversation) {
-    if (conversation != null && conversation.getConversationName() != null) {
-      return conversation.getConversationName();
-    }
-    return DEFAULT_CONVERSATION_NAME;
   }
 }

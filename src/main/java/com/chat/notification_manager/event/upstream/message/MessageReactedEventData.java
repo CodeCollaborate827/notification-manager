@@ -1,5 +1,6 @@
-package com.chat.notification_manager.event.upstream;
+package com.chat.notification_manager.event.upstream.message;
 
+import com.chat.notification_manager.enums.MessageReaction;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -9,11 +10,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class MessageMentionedEvent {
+public class MessageReactedEventData {
   private String senderId;
-  private String recipientId;
   private String messageId;
   private String conversationId;
   private Long createdAt;
   private String messageContent;
+  private MessageReaction reaction;
 }
