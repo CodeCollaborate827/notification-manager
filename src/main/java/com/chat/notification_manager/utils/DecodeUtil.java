@@ -1,23 +1,27 @@
 package com.chat.notification_manager.utils;
 
+import com.chat.notification_manager.event.Event;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Base64;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
+import lombok.extern.slf4j.Slf4j;
 
-@Component
-@RequiredArgsConstructor
-public class DecodeUtil<T> {
-  private final ObjectMapper objectMapper;
+@Slf4j
+public class DecodeUtil {
+  private static final ObjectMapper objectMapper = new ObjectMapper();
 
-  public T decode(String encodedBase64, Class<T> clazz) throws JsonProcessingException {
-    byte[] decoded = Base64.getDecoder().decode(encodedBase64);
+  public static <T> T decode(Event event, Class<T> clazz) {
+    byte[] decoded = Base64.getDecoder().decode(event.getPayloadBase64());
     String json = new String(decoded);
-    return objectMapper.readValue(json, clazz);
+    try {
+      return objectMapper.readValue(json, clazz);
+    } catch (JsonProcessingException e) {
+      log.error("Error decoding event {}", e.getMessage(), e);
+      return null;
+    }
   }
 
-  public String encode(T object) throws JsonProcessingException {
+  public static String encode(Object object) throws JsonProcessingException {
     String json = objectMapper.writeValueAsString(object);
     return Base64.getEncoder().encodeToString(json.getBytes());
   }

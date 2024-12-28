@@ -3,7 +3,6 @@ package com.chat.notification_manager.dto.response;
 import com.chat.notification_manager.enums.NotificationType;
 import com.chat.notification_manager.enums.Status;
 import com.chat.notification_manager.model.NotificationProperties;
-import java.time.OffsetDateTime;
 import lombok.Builder;
 import lombok.Data;
 
@@ -18,5 +17,5 @@ public class NotificationDTO {
   private NotificationType type;
   private String imageUrl;
   private NotificationProperties properties;
-  private OffsetDateTime createdAt;
+  private Long createdAt;
 }
