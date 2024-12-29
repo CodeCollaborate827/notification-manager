@@ -11,7 +11,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class MessageReactedEventData {
-  private String senderId;
+  private String messageSenderId;
+  private String reactionSenderId;
   private String messageId;
   private String conversationId;
   private Long createdAt;

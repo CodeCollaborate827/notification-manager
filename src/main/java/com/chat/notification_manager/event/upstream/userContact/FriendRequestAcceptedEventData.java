@@ -16,8 +16,8 @@ public class FriendRequestAcceptedEventData {
     DENIED
   }
 
-  private String senderId;
-  private String recipientId;
+  private String requestSenderId;
+  private String requestRecipientId;
   private Status status;
   private Long timestamp;
 }

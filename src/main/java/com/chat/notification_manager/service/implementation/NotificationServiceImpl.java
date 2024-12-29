@@ -2,6 +2,9 @@ package com.chat.notification_manager.service.implementation;
 
 import com.chat.notification_manager.document.Conversation;
 import com.chat.notification_manager.document.Notification;
+import com.chat.notification_manager.document.notificationProperties.AddFriendNotificationProperties;
+import com.chat.notification_manager.document.notificationProperties.MessageMentionedNotificationProperties;
+import com.chat.notification_manager.document.notificationProperties.MessageReactedNotificationProperties;
 import com.chat.notification_manager.dto.response.NotificationDTO;
 import com.chat.notification_manager.enums.Status;
 import com.chat.notification_manager.event.downstream.NotificationEvent;
@@ -13,9 +16,6 @@ import com.chat.notification_manager.event.upstream.userContact.FriendRequestAcc
 import com.chat.notification_manager.event.upstream.userContact.NewFriendRequestEventData;
 import com.chat.notification_manager.exception.ApplicationException;
 import com.chat.notification_manager.exception.ErrorCode;
-import com.chat.notification_manager.model.AddFriendNotificationProperties;
-import com.chat.notification_manager.model.MessageMentionedNotificationProperties;
-import com.chat.notification_manager.model.MessageReactedNotificationProperties;
 import com.chat.notification_manager.repository.ConversationRepository;
 import com.chat.notification_manager.repository.NotificationRepository;
 import com.chat.notification_manager.repository.UserRepository;
@@ -47,9 +47,7 @@ public class NotificationServiceImpl implements NotificationService {
         .flatMap(
             notification ->
                 Mono.zip(
-                        userRepository.findById(
-                            Objects.requireNonNull(
-                                NotificationUtils.getSenderIdFromNotificationProps(notification))),
+                        userRepository.findById(userId),
                         conversationRepository.findById(
                             Objects.requireNonNull(
                                 NotificationUtils.getConversationIdFromNotificationProps(
@@ -70,9 +68,7 @@ public class NotificationServiceImpl implements NotificationService {
         .flatMap(
             notification ->
                 Mono.zip(
-                        userRepository.findById(
-                            Objects.requireNonNull(
-                                NotificationUtils.getSenderIdFromNotificationProps(notification))),
+                        userRepository.findById(userId),
                         conversationRepository.findById(
                             Objects.requireNonNull(
                                 NotificationUtils.getConversationIdFromNotificationProps(
@@ -119,7 +115,7 @@ public class NotificationServiceImpl implements NotificationService {
   public Mono<NotificationEvent> processFriendRequestAcceptedNotification(
       FriendRequestAcceptedEventData friendRequestAcceptedEvent) {
     Notification notification = NotificationUtils.createNotification(friendRequestAcceptedEvent);
-    return saveNotification(notification).flatMap(this::createFriendRequestEvent);
+    return saveNotification(notification).flatMap(this::createFriendRequestAcceptedEvent);
   }
 
   @Override
@@ -157,7 +153,7 @@ public class NotificationServiceImpl implements NotificationService {
     MessageReactedNotificationProperties properties =
         (MessageReactedNotificationProperties) notification.getProperties();
     return Mono.zip(
-            userRepository.findById(properties.getSenderId()),
+            userRepository.findById(properties.getReactionSenderId()),
             conversationRepository.findById(properties.getConversationId()))
         .map(
             tuple ->
@@ -169,7 +165,18 @@ public class NotificationServiceImpl implements NotificationService {
     AddFriendNotificationProperties properties =
         (AddFriendNotificationProperties) notification.getProperties();
     return userRepository
-        .findById(properties.getSenderId())
+        .findById(properties.getRequestSenderId())
+        .doOnNext(user -> log.info("User found: {}", user))
+        .map(user -> NotificationUtils.createNotificationDTO(notification, user, null))
+        .map(NotificationUtils::createNotificationEvent);
+  }
+
+  private Mono<NotificationEvent> createFriendRequestAcceptedEvent(Notification notification) {
+    AddFriendNotificationProperties properties =
+        (AddFriendNotificationProperties) notification.getProperties();
+    return userRepository
+        .findById(properties.getRequestRecipientId())
+        .doOnNext(user -> log.info("User found: {}", user))
         .map(user -> NotificationUtils.createNotificationDTO(notification, user, null))
         .map(NotificationUtils::createNotificationEvent);
   }
@@ -178,7 +185,7 @@ public class NotificationServiceImpl implements NotificationService {
     MessageMentionedNotificationProperties properties =
         (MessageMentionedNotificationProperties) notification.getProperties();
     return Mono.zip(
-            userRepository.findById(properties.getSenderId()),
+            userRepository.findById(properties.getMessageSenderId()),
             conversationRepository.findById(properties.getConversationId()))
         .map(
             tuple ->

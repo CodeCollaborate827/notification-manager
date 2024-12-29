@@ -3,6 +3,10 @@ package com.chat.notification_manager.utils;
 import com.chat.notification_manager.document.Conversation;
 import com.chat.notification_manager.document.Notification;
 import com.chat.notification_manager.document.User;
+import com.chat.notification_manager.document.notificationProperties.AddFriendNotificationProperties;
+import com.chat.notification_manager.document.notificationProperties.MessageMentionedNotificationProperties;
+import com.chat.notification_manager.document.notificationProperties.MessageReactedNotificationProperties;
+import com.chat.notification_manager.document.notificationProperties.NotificationProperties;
 import com.chat.notification_manager.dto.response.NotificationDTO;
 import com.chat.notification_manager.enums.MessageReaction;
 import com.chat.notification_manager.enums.NotificationType;
@@ -12,10 +16,6 @@ import com.chat.notification_manager.event.upstream.message.MessageMentionedEven
 import com.chat.notification_manager.event.upstream.message.MessageReactedEventData;
 import com.chat.notification_manager.event.upstream.userContact.FriendRequestAcceptedEventData;
 import com.chat.notification_manager.event.upstream.userContact.NewFriendRequestEventData;
-import com.chat.notification_manager.model.AddFriendNotificationProperties;
-import com.chat.notification_manager.model.MessageMentionedNotificationProperties;
-import com.chat.notification_manager.model.MessageReactedNotificationProperties;
-import com.chat.notification_manager.model.NotificationProperties;
 import java.time.Instant;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
@@ -28,11 +28,22 @@ public class NotificationUtils {
 
   public static NotificationDTO createNotificationDTO(
       Notification notification, User sender, Conversation conversation) {
+    String conversationName;
+    List<String> conversationAvatar;
 
-    String conversationName =
-        ConversationUtils.getConversationName(conversation, notification.getUserId(), null);
-    List<String> conversationAvatar =
-        ConversationUtils.getConversationAvatar(conversation, notification.getUserId(), null);
+    // If the notification is not related to a conversation, the conversation will be null
+    // In this case, we will use the sender's name and profile picture as the conversation name and
+    // avatar
+    if (conversation != null) {
+      conversationName =
+          ConversationUtils.getConversationName(conversation, notification.getUserId(), null);
+      conversationAvatar =
+          ConversationUtils.getConversationAvatar(conversation, notification.getUserId(), null);
+    } else {
+      conversationName = sender.getDisplayName();
+      conversationAvatar = List.of(sender.getAvatar());
+    }
+
     String title =
         NotificationMessageGenerator.generateTitle(
             notification.getType(), sender, conversationName);
@@ -71,7 +82,7 @@ public class NotificationUtils {
             messageMentionedEvent.getRecipientId(),
             NotificationType.NOTIFICATION_MESSAGE_MENTIONED,
             MessageMentionedNotificationProperties.builder()
-                .senderId(messageMentionedEvent.getSenderId())
+                .messageSenderId(messageMentionedEvent.getSenderId())
                 .conversationId(messageMentionedEvent.getConversationId())
                 .messageId(messageMentionedEvent.getMessageId())
                 .build());
@@ -82,10 +93,10 @@ public class NotificationUtils {
   public static Notification createNotification(MessageReactedEventData messageReactedEvent) {
     NotificationDetails notificationDetails =
         new NotificationDetails(
-            messageReactedEvent.getSenderId(),
+            messageReactedEvent.getMessageSenderId(),
             NotificationType.NOTIFICATION_MESSAGE_REACTED,
             MessageReactedNotificationProperties.builder()
-                .senderId(messageReactedEvent.getSenderId())
+                .reactionSenderId(messageReactedEvent.getReactionSenderId())
                 .conversationId(messageReactedEvent.getConversationId())
                 .messageId(messageReactedEvent.getMessageId())
                 .reaction(
@@ -97,29 +108,35 @@ public class NotificationUtils {
   public static Notification createNotification(NewFriendRequestEventData event) {
     NotificationDetails notificationDetails =
         new NotificationDetails(
-            event.getRecipientId(),
+            event.getRequestRecipientId(),
             NotificationType.NOTIFICATION_NEW_FRIEND_REQUEST,
-            AddFriendNotificationProperties.builder().senderId(event.getSenderId()).build());
+            AddFriendNotificationProperties.builder()
+                .requestSenderId(event.getRequestSenderId())
+                .requestRecipientId(event.getRequestRecipientId())
+                .build());
     return createNotificationFromDetails(notificationDetails);
   }
 
   public static Notification createNotification(FriendRequestAcceptedEventData event) {
     NotificationDetails notificationDetails =
         new NotificationDetails(
-            event.getSenderId(),
+            event.getRequestSenderId(),
             NotificationType.NOTIFICATION_FRIEND_REQUEST_ACCEPTED,
-            AddFriendNotificationProperties.builder().senderId(event.getSenderId()).build());
+            AddFriendNotificationProperties.builder()
+                .requestSenderId(event.getRequestSenderId())
+                .requestRecipientId(event.getRequestRecipientId())
+                .build());
     return createNotificationFromDetails(notificationDetails);
   }
 
   public static String getSenderIdFromNotificationProps(Notification notification) {
     return switch (notification.getType()) {
       case NOTIFICATION_NEW_FRIEND_REQUEST ->
-          ((AddFriendNotificationProperties) notification.getProperties()).getSenderId();
+          ((AddFriendNotificationProperties) notification.getProperties()).getRequestSenderId();
       case NOTIFICATION_MESSAGE_MENTIONED ->
-          ((MessageMentionedNotificationProperties) notification.getProperties()).getSenderId();
-      case NOTIFICATION_MESSAGE_REACTED ->
-          ((MessageReactedNotificationProperties) notification.getProperties()).getSenderId();
+          ((MessageMentionedNotificationProperties) notification.getProperties())
+              .getMessageSenderId();
+      case NOTIFICATION_MESSAGE_REACTED -> notification.getUserId();
       default -> null;
     };
   }

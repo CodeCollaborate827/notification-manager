@@ -36,7 +36,6 @@ public class ConsumerBindingConfig {
                     ::processMessageMentionedEvent) // process message mentioned event and save
             // notification to db
             .map(Utils::createGenericMessage) // create generic message and publish to kafka
-            .doOnNext(msg -> log.info("Message mentioned event processed: {}", msg))
             .map(s -> s); // create generic message and publish to kafka
   }
 
@@ -92,7 +91,7 @@ public class ConsumerBindingConfig {
             .flatMap(
                 notificationService
                     ::processConversationEvent) // process conversation event and save notification
-                                                // to db
+            // to db
             .subscribe();
   }
 }

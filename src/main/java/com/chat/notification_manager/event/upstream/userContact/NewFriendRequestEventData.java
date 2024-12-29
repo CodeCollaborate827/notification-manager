@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class NewFriendRequestEventData {
-  private String senderId;
-  private String recipientId;
+  private String requestSenderId;
+  private String requestRecipientId;
   private Long createdAt;
 }

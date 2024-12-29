@@ -33,7 +33,7 @@ public class Utils {
     return User.builder()
         .id(userRegistrationEvent.getUserId())
         .displayName(userRegistrationEvent.getDisplayName())
-        .profilePicture(userRegistrationEvent.getAvatar())
+        .avatar(userRegistrationEvent.getAvatar())
         .build();
   }
 

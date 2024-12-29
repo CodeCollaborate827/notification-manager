@@ -1,8 +1,8 @@
 package com.chat.notification_manager.dto.response;
 
+import com.chat.notification_manager.document.notificationProperties.NotificationProperties;
 import com.chat.notification_manager.enums.NotificationType;
 import com.chat.notification_manager.enums.Status;
-import com.chat.notification_manager.model.NotificationProperties;
 import java.util.List;
 import lombok.Builder;
 import lombok.Data;

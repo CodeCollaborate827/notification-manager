@@ -11,12 +11,15 @@ public class NotificationMessageGenerator {
   // notification title templates
   private static final String DEFAULT_NOTIFICATION_TITLE = "Notification";
   private static final String NEW_FRIEND_REQUEST_TITLE = "New Friend Request from %s";
+  private static final String FRIEND_REQUEST_ACCEPTED_TITLE = "%s accepted your friend request";
   private static final String MESSAGE_MENTIONED_TITLE = "%s mentioned you in %s";
   private static final String MESSAGE_REACTED_TITLE = "%s reacted to your message in %s";
 
   // notification content templates
   private static final String NEW_FRIEND_REQUEST_CONTENT =
       "%s wants to connect with you. Click to view their profile and accept the request.";
+  private static final String FRIEND_REQUEST_ACCEPTED_CONTENT =
+      "%s accepted your friend request. You are now connected! Tap to start a conversation or view their profile.";
   private static final String MESSAGE_MENTIONED_CONTENT =
       "You were mentioned by %s in %s. Tap to view the message.";
   private static final String MESSAGE_REACTED_CONTENT =
@@ -31,6 +34,8 @@ public class NotificationMessageGenerator {
 
     return switch (type) {
       case NOTIFICATION_NEW_FRIEND_REQUEST -> NEW_FRIEND_REQUEST_TITLE.formatted(displayName);
+      case NOTIFICATION_FRIEND_REQUEST_ACCEPTED ->
+          FRIEND_REQUEST_ACCEPTED_TITLE.formatted(displayName);
       case NOTIFICATION_MESSAGE_MENTIONED ->
           MESSAGE_MENTIONED_TITLE.formatted(displayName, conversationName);
       case NOTIFICATION_MESSAGE_REACTED ->
@@ -45,6 +50,8 @@ public class NotificationMessageGenerator {
 
     return switch (type) {
       case NOTIFICATION_NEW_FRIEND_REQUEST -> NEW_FRIEND_REQUEST_CONTENT.formatted(displayName);
+      case NOTIFICATION_FRIEND_REQUEST_ACCEPTED ->
+          FRIEND_REQUEST_ACCEPTED_CONTENT.formatted(displayName);
       case NOTIFICATION_MESSAGE_MENTIONED ->
           MESSAGE_MENTIONED_CONTENT.formatted(displayName, conversationName);
       case NOTIFICATION_MESSAGE_REACTED ->
