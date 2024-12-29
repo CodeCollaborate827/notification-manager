@@ -12,8 +12,8 @@ import com.chat.notification_manager.enums.MessageReaction;
 import com.chat.notification_manager.enums.NotificationType;
 import com.chat.notification_manager.enums.Status;
 import com.chat.notification_manager.event.downstream.NotificationEvent;
-import com.chat.notification_manager.event.upstream.message.MessageMentionedEventData;
-import com.chat.notification_manager.event.upstream.message.MessageReactedEventData;
+import com.chat.notification_manager.event.upstream.message.MessageMentionedNotificationTriggerEvent;
+import com.chat.notification_manager.event.upstream.message.MessageReactedNotificationTriggerEvent;
 import com.chat.notification_manager.event.upstream.userContact.FriendRequestAcceptedEventData;
 import com.chat.notification_manager.event.upstream.userContact.NewFriendRequestEventData;
 import java.time.Instant;
@@ -76,13 +76,13 @@ public class NotificationUtils {
     return build;
   }
 
-  public static Notification createNotification(MessageMentionedEventData messageMentionedEvent) {
+  public static Notification createNotification(MessageMentionedNotificationTriggerEvent messageMentionedEvent) {
     NotificationDetails notificationDetails =
         new NotificationDetails(
-            messageMentionedEvent.getRecipientId(),
+            messageMentionedEvent.getMentionedMemberId(),
             NotificationType.NOTIFICATION_MESSAGE_MENTIONED,
             MessageMentionedNotificationProperties.builder()
-                .messageSenderId(messageMentionedEvent.getSenderId())
+                .messageSenderId(messageMentionedEvent.getMessageSenderId())
                 .conversationId(messageMentionedEvent.getConversationId())
                 .messageId(messageMentionedEvent.getMessageId())
                 .build());
@@ -90,7 +90,7 @@ public class NotificationUtils {
     return createNotificationFromDetails(notificationDetails);
   }
 
-  public static Notification createNotification(MessageReactedEventData messageReactedEvent) {
+  public static Notification createNotification(MessageReactedNotificationTriggerEvent messageReactedEvent) {
     NotificationDetails notificationDetails =
         new NotificationDetails(
             messageReactedEvent.getMessageSenderId(),

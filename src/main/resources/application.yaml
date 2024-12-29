@@ -15,15 +15,14 @@ spring:
           destination: topic.user.registration
         handleConversationEvent-in-0:
           destination: topic.conversation.events
-        # message events
         handleMessageMentionedEvent-in-0:
-          destination: topic.message.mentioned
+          destination: topic.notification.trigger.message.mentioned
         handleMessageReactedEvent-in-0:
-          destination: topic.message.reacted
+          destination: topic.notification.trigger.message.reacted
         handleNewFriendRequestEvent-in-0:
-          destination: topic.user.friend.request.new
+          destination: topic.notification.trigger.friend.request.new
         handleFriendRequestAcceptedEvent-in-0:
-          destination: topic.user.friend.request.accepted
+          destination: topic.notification.trigger.friend.request.accepted
         handleMessageMentionedEvent-out-0:
           destination: topic.notification.events
         handleMessageReactedEvent-out-0:

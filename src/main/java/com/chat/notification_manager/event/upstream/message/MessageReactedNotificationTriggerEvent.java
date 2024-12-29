@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class MessageReactedEventData {
+public class MessageReactedNotificationTriggerEvent {
   private String messageSenderId;
   private String reactionSenderId;
   private String messageId;

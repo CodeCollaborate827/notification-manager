@@ -5,8 +5,8 @@ import com.chat.notification_manager.document.Notification;
 import com.chat.notification_manager.dto.response.NotificationDTO;
 import com.chat.notification_manager.event.downstream.NotificationEvent;
 import com.chat.notification_manager.event.upstream.conversation.ConversationEvent;
-import com.chat.notification_manager.event.upstream.message.MessageMentionedEventData;
-import com.chat.notification_manager.event.upstream.message.MessageReactedEventData;
+import com.chat.notification_manager.event.upstream.message.MessageMentionedNotificationTriggerEvent;
+import com.chat.notification_manager.event.upstream.message.MessageReactedNotificationTriggerEvent;
 import com.chat.notification_manager.event.upstream.userContact.FriendRequestAcceptedEventData;
 import com.chat.notification_manager.event.upstream.userContact.NewFriendRequestEventData;
 import org.springframework.http.ResponseEntity;
@@ -21,9 +21,9 @@ public interface NotificationService {
   Mono<Notification> saveNotification(Notification notification);
 
   Mono<NotificationEvent> processMessageMentionedEvent(
-      MessageMentionedEventData messageMentionedEvent);
+      MessageMentionedNotificationTriggerEvent messageMentionedEvent);
 
-  Mono<NotificationEvent> processMessageReactedEvent(MessageReactedEventData messageReactedEvent);
+  Mono<NotificationEvent> processMessageReactedEvent(MessageReactedNotificationTriggerEvent messageReactedEvent);
 
   Mono<NotificationEvent> processFriendRequestNotification(
       NewFriendRequestEventData newFriendRequestEvent);

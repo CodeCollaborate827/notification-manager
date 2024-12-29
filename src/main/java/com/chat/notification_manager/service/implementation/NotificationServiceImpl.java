@@ -10,8 +10,8 @@ import com.chat.notification_manager.enums.Status;
 import com.chat.notification_manager.event.downstream.NotificationEvent;
 import com.chat.notification_manager.event.upstream.conversation.ConversationEvent;
 import com.chat.notification_manager.event.upstream.conversation.NewConversationEventData;
-import com.chat.notification_manager.event.upstream.message.MessageMentionedEventData;
-import com.chat.notification_manager.event.upstream.message.MessageReactedEventData;
+import com.chat.notification_manager.event.upstream.message.MessageMentionedNotificationTriggerEvent;
+import com.chat.notification_manager.event.upstream.message.MessageReactedNotificationTriggerEvent;
 import com.chat.notification_manager.event.upstream.userContact.FriendRequestAcceptedEventData;
 import com.chat.notification_manager.event.upstream.userContact.NewFriendRequestEventData;
 import com.chat.notification_manager.exception.ApplicationException;
@@ -92,14 +92,14 @@ public class NotificationServiceImpl implements NotificationService {
 
   @Override
   public Mono<NotificationEvent> processMessageMentionedEvent(
-      MessageMentionedEventData messageMentionedEvent) {
+      MessageMentionedNotificationTriggerEvent messageMentionedEvent) {
     Notification notification = NotificationUtils.createNotification(messageMentionedEvent);
     return saveNotification(notification).flatMap(this::createMessageMentionedEvent);
   }
 
   @Override
   public Mono<NotificationEvent> processMessageReactedEvent(
-      MessageReactedEventData messageReactedEvent) {
+      MessageReactedNotificationTriggerEvent messageReactedEvent) {
     Notification notification = NotificationUtils.createNotification(messageReactedEvent);
     return saveNotification(notification).flatMap(this::createMessageReactedEvent);
   }

@@ -9,9 +9,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class MessageMentionedEventData {
-  private String senderId;
-  private String recipientId;
+public class MessageMentionedNotificationTriggerEvent {
+  private String messageSenderId;
+  private String mentionedMemberId;
   private String messageId;
   private String conversationId;
   private Long createdAt;

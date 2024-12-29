@@ -2,8 +2,8 @@ package com.chat.notification_manager.config;
 
 import com.chat.notification_manager.event.Event;
 import com.chat.notification_manager.event.upstream.conversation.ConversationEvent;
-import com.chat.notification_manager.event.upstream.message.MessageMentionedEventData;
-import com.chat.notification_manager.event.upstream.message.MessageReactedEventData;
+import com.chat.notification_manager.event.upstream.message.MessageMentionedNotificationTriggerEvent;
+import com.chat.notification_manager.event.upstream.message.MessageReactedNotificationTriggerEvent;
 import com.chat.notification_manager.event.upstream.userAccount.UserRegistrationEventData;
 import com.chat.notification_manager.event.upstream.userContact.FriendRequestAcceptedEventData;
 import com.chat.notification_manager.event.upstream.userContact.NewFriendRequestEventData;
@@ -30,7 +30,7 @@ public class ConsumerBindingConfig {
   @Bean
   public Function<Flux<Message<Event>>, Flux<Message<Event>>> handleMessageMentionedEvent() {
     return flux ->
-        flux.mapNotNull(msg -> DecodeUtil.decode(msg.getPayload(), MessageMentionedEventData.class))
+        flux.mapNotNull(msg -> DecodeUtil.decode(msg.getPayload(), MessageMentionedNotificationTriggerEvent.class))
             .flatMap(
                 notificationService
                     ::processMessageMentionedEvent) // process message mentioned event and save
@@ -42,7 +42,7 @@ public class ConsumerBindingConfig {
   @Bean
   public Function<Flux<Message<Event>>, Flux<Message<Event>>> handleMessageReactedEvent() {
     return flux ->
-        flux.mapNotNull(msg -> DecodeUtil.decode(msg.getPayload(), MessageReactedEventData.class))
+        flux.mapNotNull(msg -> DecodeUtil.decode(msg.getPayload(), MessageReactedNotificationTriggerEvent.class))
             .flatMap(
                 notificationService
                     ::processMessageReactedEvent) // process message reacted event and save
