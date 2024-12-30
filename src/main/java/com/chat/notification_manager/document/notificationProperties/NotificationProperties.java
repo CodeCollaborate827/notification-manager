@@ -1,4 +1,4 @@
-package com.chat.notification_manager.model;
+package com.chat.notification_manager.document.notificationProperties;
 
 import lombok.NoArgsConstructor;
 

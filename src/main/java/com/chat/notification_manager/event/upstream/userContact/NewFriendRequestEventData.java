@@ -1,4 +1,4 @@
-package com.chat.notification_manager.event.upstream;
+package com.chat.notification_manager.event.upstream.userContact;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,8 +9,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class NewFriendRequestEvent {
-  private String senderId;
-  private String recipientId;
+public class NewFriendRequestEventData {
+  private String requestSenderId;
+  private String requestRecipientId;
   private Long createdAt;
 }

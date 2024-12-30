@@ -1,4 +1,4 @@
-package com.chat.notification_manager.event.upstream;
+package com.chat.notification_manager.event.upstream.userAccount;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class UserRegistrationEvent {
+public class UserRegistrationEventData {
   private String userId;
   private String username;
   private String displayName;

@@ -1,4 +1,4 @@
-package com.chat.notification_manager.event.upstream;
+package com.chat.notification_manager.event.upstream.message;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,9 +9,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class MessageMentionedEvent {
-  private String senderId;
-  private String recipientId;
+public class MessageMentionedNotificationTriggerEvent {
+  private String messageSenderId;
+  private String mentionedMemberId;
   private String messageId;
   private String conversationId;
   private Long createdAt;

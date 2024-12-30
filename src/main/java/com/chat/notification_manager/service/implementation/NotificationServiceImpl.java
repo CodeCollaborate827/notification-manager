@@ -1,23 +1,28 @@
 package com.chat.notification_manager.service.implementation;
 
+import com.chat.notification_manager.document.Conversation;
 import com.chat.notification_manager.document.Notification;
+import com.chat.notification_manager.document.notificationProperties.AddFriendNotificationProperties;
+import com.chat.notification_manager.document.notificationProperties.MessageMentionedNotificationProperties;
+import com.chat.notification_manager.document.notificationProperties.MessageReactedNotificationProperties;
 import com.chat.notification_manager.dto.response.NotificationDTO;
 import com.chat.notification_manager.enums.Status;
 import com.chat.notification_manager.event.downstream.NotificationEvent;
-import com.chat.notification_manager.event.upstream.FriendRequestAcceptedEvent;
-import com.chat.notification_manager.event.upstream.MessageMentionedEvent;
-import com.chat.notification_manager.event.upstream.MessageReactedEvent;
-import com.chat.notification_manager.event.upstream.NewFriendRequestEvent;
+import com.chat.notification_manager.event.upstream.conversation.ConversationEvent;
+import com.chat.notification_manager.event.upstream.conversation.NewConversationEventData;
+import com.chat.notification_manager.event.upstream.message.MessageMentionedNotificationTriggerEvent;
+import com.chat.notification_manager.event.upstream.message.MessageReactedNotificationTriggerEvent;
+import com.chat.notification_manager.event.upstream.userContact.FriendRequestAcceptedEventData;
+import com.chat.notification_manager.event.upstream.userContact.NewFriendRequestEventData;
 import com.chat.notification_manager.exception.ApplicationException;
 import com.chat.notification_manager.exception.ErrorCode;
-import com.chat.notification_manager.model.AddFriendNotificationProperties;
-import com.chat.notification_manager.model.MessageMentionedNotificationProperties;
-import com.chat.notification_manager.model.MessageReactedNotificationProperties;
 import com.chat.notification_manager.repository.ConversationRepository;
 import com.chat.notification_manager.repository.NotificationRepository;
 import com.chat.notification_manager.repository.UserRepository;
 import com.chat.notification_manager.service.NotificationService;
+import com.chat.notification_manager.utils.ConversationUtils;
 import com.chat.notification_manager.utils.NotificationUtils;
+import com.chat.notification_manager.utils.Utils;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -42,9 +47,7 @@ public class NotificationServiceImpl implements NotificationService {
         .flatMap(
             notification ->
                 Mono.zip(
-                        userRepository.findById(
-                            Objects.requireNonNull(
-                                NotificationUtils.getSenderIdFromNotificationProps(notification))),
+                        userRepository.findById(userId),
                         conversationRepository.findById(
                             Objects.requireNonNull(
                                 NotificationUtils.getConversationIdFromNotificationProps(
@@ -65,9 +68,7 @@ public class NotificationServiceImpl implements NotificationService {
         .flatMap(
             notification ->
                 Mono.zip(
-                        userRepository.findById(
-                            Objects.requireNonNull(
-                                NotificationUtils.getSenderIdFromNotificationProps(notification))),
+                        userRepository.findById(userId),
                         conversationRepository.findById(
                             Objects.requireNonNull(
                                 NotificationUtils.getConversationIdFromNotificationProps(
@@ -91,37 +92,68 @@ public class NotificationServiceImpl implements NotificationService {
 
   @Override
   public Mono<NotificationEvent> processMessageMentionedEvent(
-      MessageMentionedEvent messageMentionedEvent) {
+      MessageMentionedNotificationTriggerEvent messageMentionedEvent) {
     Notification notification = NotificationUtils.createNotification(messageMentionedEvent);
     return saveNotification(notification).flatMap(this::createMessageMentionedEvent);
   }
 
   @Override
   public Mono<NotificationEvent> processMessageReactedEvent(
-      MessageReactedEvent messageReactedEvent) {
+      MessageReactedNotificationTriggerEvent messageReactedEvent) {
     Notification notification = NotificationUtils.createNotification(messageReactedEvent);
     return saveNotification(notification).flatMap(this::createMessageReactedEvent);
   }
 
   @Override
   public Mono<NotificationEvent> processFriendRequestNotification(
-      NewFriendRequestEvent newFriendRequestEvent) {
+      NewFriendRequestEventData newFriendRequestEvent) {
     Notification notification = NotificationUtils.createNotification(newFriendRequestEvent);
     return saveNotification(notification).flatMap(this::createFriendRequestEvent);
   }
 
   @Override
   public Mono<NotificationEvent> processFriendRequestAcceptedNotification(
-      FriendRequestAcceptedEvent friendRequestAcceptedEvent) {
+      FriendRequestAcceptedEventData friendRequestAcceptedEvent) {
     Notification notification = NotificationUtils.createNotification(friendRequestAcceptedEvent);
-    return saveNotification(notification).flatMap(this::createFriendRequestEvent);
+    return saveNotification(notification).flatMap(this::createFriendRequestAcceptedEvent);
+  }
+
+  @Override
+  public Mono<Conversation> processConversationEvent(ConversationEvent conversationEvent) {
+    // TODO: find a design pattern to handle this scenario when there are multiple types of events,
+    // each has different processing logic
+    if (conversationEvent
+        .getMessageType()
+        .equals(ConversationEvent.ConversationEventType.CONVERSATION_NEW)) {
+      log.info("Processing new conversation event: {}", conversationEvent.getData());
+      NewConversationEventData newConversationEventData =
+          Utils.convertObject(conversationEvent.getData(), NewConversationEventData.class);
+      Conversation conversation = ConversationUtils.createConversation(newConversationEventData);
+
+      // check if conversation already exists
+      return conversationRepository
+          .findById(conversation.getId())
+          .map(
+              existedConversation -> {
+                log.error("Conversation already exists: {}", existedConversation);
+                return existedConversation; // return existed conversation
+              })
+          .switchIfEmpty(conversationRepository.save(conversation))
+          .doOnSuccess(
+              savedConversation ->
+                  log.info("Conversation saved with id: {}", savedConversation.getId()));
+    }
+
+    return Mono.error(
+        new ApplicationException(
+            ErrorCode.NOTIFICATION_ERROR2)); // TODO: only support new conversation event for now
   }
 
   private Mono<NotificationEvent> createMessageReactedEvent(Notification notification) {
     MessageReactedNotificationProperties properties =
         (MessageReactedNotificationProperties) notification.getProperties();
     return Mono.zip(
-            userRepository.findById(properties.getSenderId()),
+            userRepository.findById(properties.getReactionSenderId()),
             conversationRepository.findById(properties.getConversationId()))
         .map(
             tuple ->
@@ -133,7 +165,18 @@ public class NotificationServiceImpl implements NotificationService {
     AddFriendNotificationProperties properties =
         (AddFriendNotificationProperties) notification.getProperties();
     return userRepository
-        .findById(properties.getSenderId())
+        .findById(properties.getRequestSenderId())
+        .doOnNext(user -> log.info("User found: {}", user))
+        .map(user -> NotificationUtils.createNotificationDTO(notification, user, null))
+        .map(NotificationUtils::createNotificationEvent);
+  }
+
+  private Mono<NotificationEvent> createFriendRequestAcceptedEvent(Notification notification) {
+    AddFriendNotificationProperties properties =
+        (AddFriendNotificationProperties) notification.getProperties();
+    return userRepository
+        .findById(properties.getRequestRecipientId())
+        .doOnNext(user -> log.info("User found: {}", user))
         .map(user -> NotificationUtils.createNotificationDTO(notification, user, null))
         .map(NotificationUtils::createNotificationEvent);
   }
@@ -142,7 +185,7 @@ public class NotificationServiceImpl implements NotificationService {
     MessageMentionedNotificationProperties properties =
         (MessageMentionedNotificationProperties) notification.getProperties();
     return Mono.zip(
-            userRepository.findById(properties.getSenderId()),
+            userRepository.findById(properties.getMessageSenderId()),
             conversationRepository.findById(properties.getConversationId()))
         .map(
             tuple ->

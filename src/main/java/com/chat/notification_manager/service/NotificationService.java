@@ -1,12 +1,14 @@
 package com.chat.notification_manager.service;
 
+import com.chat.notification_manager.document.Conversation;
 import com.chat.notification_manager.document.Notification;
 import com.chat.notification_manager.dto.response.NotificationDTO;
 import com.chat.notification_manager.event.downstream.NotificationEvent;
-import com.chat.notification_manager.event.upstream.FriendRequestAcceptedEvent;
-import com.chat.notification_manager.event.upstream.MessageMentionedEvent;
-import com.chat.notification_manager.event.upstream.MessageReactedEvent;
-import com.chat.notification_manager.event.upstream.NewFriendRequestEvent;
+import com.chat.notification_manager.event.upstream.conversation.ConversationEvent;
+import com.chat.notification_manager.event.upstream.message.MessageMentionedNotificationTriggerEvent;
+import com.chat.notification_manager.event.upstream.message.MessageReactedNotificationTriggerEvent;
+import com.chat.notification_manager.event.upstream.userContact.FriendRequestAcceptedEventData;
+import com.chat.notification_manager.event.upstream.userContact.NewFriendRequestEventData;
 import org.springframework.http.ResponseEntity;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -18,13 +20,16 @@ public interface NotificationService {
 
   Mono<Notification> saveNotification(Notification notification);
 
-  Mono<NotificationEvent> processMessageMentionedEvent(MessageMentionedEvent messageMentionedEvent);
+  Mono<NotificationEvent> processMessageMentionedEvent(
+      MessageMentionedNotificationTriggerEvent messageMentionedEvent);
 
-  Mono<NotificationEvent> processMessageReactedEvent(MessageReactedEvent messageReactedEvent);
+  Mono<NotificationEvent> processMessageReactedEvent(MessageReactedNotificationTriggerEvent messageReactedEvent);
 
   Mono<NotificationEvent> processFriendRequestNotification(
-      NewFriendRequestEvent newFriendRequestEvent);
+      NewFriendRequestEventData newFriendRequestEvent);
 
   Mono<NotificationEvent> processFriendRequestAcceptedNotification(
-      FriendRequestAcceptedEvent friendRequestAcceptedEvent);
+      FriendRequestAcceptedEventData friendRequestAcceptedEvent);
+
+  Mono<Conversation> processConversationEvent(ConversationEvent conversationEvent);
 }
